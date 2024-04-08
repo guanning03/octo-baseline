@@ -118,6 +118,9 @@ def continuous_loss(
 
     mse = jnp.square(pred_value - ground_truth_value)
     mse = masked_mean(mse, mask)
+    
+    ### 如果loss_type='mse'，则mse和loss相等，否则mse是用l1计算的
+    ### l1-平均的绝对值；mse-平均的差的平方
     return loss, {
         "loss": loss,
         "mse": mse,

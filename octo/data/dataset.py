@@ -449,6 +449,7 @@ def make_single_dataset(
         **dataset_kwargs,
         train=train,
     )
+    # print(f'raw dataset statistics:\n{dataset_statistics}')
     dataset = apply_trajectory_transforms(dataset, **traj_transform_kwargs, train=train)
     dataset = apply_frame_transforms(dataset, **frame_transform_kwargs, train=train)
 

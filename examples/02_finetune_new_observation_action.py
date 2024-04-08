@@ -28,6 +28,9 @@ from octo.utils.train_utils import (
     TrainState,
 )
 
+import sys
+sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
+
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string(
@@ -106,6 +109,7 @@ def main(_):
     # load pre-training config and modify --> remove wrist cam, add proprio input, change action head
     # following Zhao et al. we use "action chunks" of length 50 and L1 loss for ALOHA
     config = pretrained_model.config
+    print(config)
     del config["model"]["observation_tokenizers"]["wrist"]
     ###
     config["model"]["observation_tokenizers"]["proprio"] = ModuleSpec.create(
@@ -126,7 +130,9 @@ def main(_):
 
     # initialize weights for modified Octo model, then merge in all applicable pre-trained weights
     # new position encodings for proprio inputs & weights for new action head will remain "from scratch"
+    ### from_scratch的意思是从零开始做训练
     logging.info("Updating model for new observation & action space...")
+    print(dataset.dataset_statistics)
     model = OctoModel.from_config(
         config,
         example_batch,
@@ -142,10 +148,14 @@ def main(_):
 
     # create optimizer & train_state, optionally freeze keys for pre-trained transformer
     # train_state bundles parameters & optimizers
+    ### 使用了两步的调度器；linear_schedule在前100步内从0增加到3e-5，然后constant_schedule保持不变
     learning_rate = optax.join_schedules(
         [optax.linear_schedule(0, 3e-5, 100), optax.constant_schedule(3e-5)], [100]
     )
+    ### AdamW 优化算法
     tx = optax.adamw(learning_rate)
+    
+    ### 从模型config中拉取需要冻结的参数
     frozen_keys = model.config["optimizer"]["frozen_keys"]
     if FLAGS.freeze_transformer:
         frozen_keys.append("BlockTransformer_0")

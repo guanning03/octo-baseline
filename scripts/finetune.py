@@ -293,7 +293,8 @@ def main(_):
     # Model is replicated across devices, data is split across devices
     @partial(
         jax.jit,
-        in_shardings=[replicated_sharding, dp_sharding],
+        in_shardings=[replicated_sharding, dp_sharding], 
+        ### 数据的分片策略（replicated_sharding:模型参数复制，dp_sharding:训练数据分布式）
     )
     def train_step(state, batch):
         rng, dropout_rng = jax.random.split(state.rng)

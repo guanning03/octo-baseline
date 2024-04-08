@@ -29,6 +29,9 @@ class ScoreActor(nn.Module):
     def __call__(self, obs_enc, actions, time, train=False):
         t_ff = self.time_preprocess(time)
         cond_enc = self.cond_encoder(t_ff, train=train)
+        
+        ### Diffusion Policy以observation和timestep作为条件
+        ### actions是上一个 denoising step的输出
         reverse_input = jnp.concatenate([cond_enc, obs_enc, actions], axis=-1)
         eps_pred = self.reverse_network(reverse_input, train=train)
         return eps_pred

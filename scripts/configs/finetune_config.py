@@ -4,7 +4,11 @@ from ml_collections.config_dict import FieldReference, placeholder
 
 def get_config(config_string="full,multimodal"):
     mode, task = config_string.split(",")
+    
+    ### task中是否包含文字/图片指令
     assert task in ["image_conditioned", "language_conditioned", "multimodal"]
+    
+    ### 训练的参数包括哪个部分
     assert mode in ["full", "head_only", "head_mlp_only"]
 
     # Fill this in for your own dataset!

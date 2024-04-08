@@ -24,6 +24,12 @@ def chunk_act_obs(
     """
     traj_len = tf.shape(traj["action"])[0]
     action_dim = traj["action"].shape[-1]
+    
+    ### 这里为observation和action添加了编号。
+    ### observation的编号从 -window_size + 1 到 0，重复traj_len次;
+    ### 然后observation += traj_len * tf.range(traj_len)[:, None]，表示了每个timestep的observation编号。意思是，随着timestep的增加，observation的编号也在增加。
+    ### action的编号从 -window_size + 1 到 1 + future_action_window_size，重复traj_len次
+    ### 同理加上时间戳编号
     chunk_indices = tf.broadcast_to(
         tf.range(-window_size + 1, 1), [traj_len, window_size]
     ) + tf.broadcast_to(tf.range(traj_len)[:, None], [traj_len, window_size])
@@ -36,13 +42,17 @@ def chunk_act_obs(
         [traj_len, window_size + future_action_window_size],
     )
 
+    ### floored_chunk_indices截取了大于等于0的chunk_indices
+    ### 一开始只有1个observation，之后每个timestep会有一个新的observation
     floored_chunk_indices = tf.maximum(chunk_indices, 0)
 
+    ### 在timestep不存在的情况下, goal_timestep = traj_len - 1，重复traj_len次
     if "timestep" in traj["task"]:
         goal_timestep = traj["task"]["timestep"]
     else:
         goal_timestep = tf.fill([traj_len], traj_len - 1)
 
+    ### floored_action_chunk_indice截取了介于0和goal_timestep之间的action_chunk_indices
     floored_action_chunk_indices = tf.minimum(
         tf.maximum(action_chunk_indices, 0), goal_timestep[:, None]
     )
@@ -71,6 +81,8 @@ def chunk_act_obs(
     )
 
     # actions past the goal timestep become neutral
+    
+    ### GPT："neutral actions"：这可能是指不会改变环境状态的动作。在这段代码中，相对动作被置零以生成中性动作，这可能是因为在某些情况下，我们希望生成一个动作序列，但不希望这个动作序列对环境产生任何影响。例如，在训练一个强化学习模型时，我们可能希望生成一个动作序列来评估模型的性能，但不希望这个动作序列改变环境的状态。
     action_past_goal = action_chunk_indices > goal_timestep[:, None]
     traj["action"] = tf.where(
         action_past_goal[:, :, None], neutral_actions, traj["action"]
@@ -96,6 +108,7 @@ def add_pad_mask_dict(traj: dict) -> dict:
     for key in ["observation", "task"]:
         pad_mask_dict = {}
         for subkey in traj[key]:
+            ### 如果不为空字符串，则pad_mask_key为True，表示不是padding
             if traj[key][subkey].dtype == tf.string:
                 # handles "language_instruction", "image_*", and "depth_*"
                 pad_mask_dict[subkey] = tf.strings.length(traj[key][subkey]) != 0

@@ -14,6 +14,8 @@ class TokenGroup:
         mask: jax.Array of shape (..., n_tokens) indicating which tokens are valid (1) vs padding (0)
     """
 
+    ### flax.struct.dataclass是一个装饰器，用于定义一个数据类
+    ### tokens和mask的顺序是不能互换的，因为flax.struct.dataclass装饰器会参考声明的顺序来自动定义__init__方法
     tokens: jax.typing.ArrayLike
     mask: jax.typing.ArrayLike
 
@@ -21,6 +23,7 @@ class TokenGroup:
     def create(
         cls, tokens: jax.typing.ArrayLike, mask: jax.typing.ArrayLike = None, **kwargs
     ):
+        ### ArrayLike是指各种可以转换为JAX数组的对象，比如列表，元组，numpy数组等
         if mask is None:
             mask = jnp.ones(tokens.shape[:-1])
         assert mask.ndim == tokens.ndim - 1

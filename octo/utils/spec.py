@@ -65,6 +65,7 @@ class ModuleSpec(TypedDict):
             )
         cls = _import_from_string(spec["module"], spec["name"])
         return partial(cls, *spec["args"], **spec["kwargs"])
+        ### partial函数的意思：partial application（部分应用，从原来的函数中固定若干参数，将剩余的参数保留作为新函数的参数）
 
     @staticmethod
     def to_string(spec: "ModuleSpec"):  # type: ignore

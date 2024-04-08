@@ -156,6 +156,7 @@ class OctoModel:
             pad_mask,
             train=train,
             method="octo_transformer",
+            verbose=True
         )
 
     @partial(jax.jit, static_argnames=("train", "sample_shape", "argmax"))
@@ -231,6 +232,7 @@ class OctoModel:
             tf.io.gfile.join(checkpoint_path, "example_batch.msgpack"), "rb"
         ) as f:
             example_batch = flax.serialization.msgpack_restore(f.read())
+            
         # shim for migrating from "tasks" to "task"
         if "tasks" in example_batch:
             example_batch["task"] = example_batch.pop("tasks")
