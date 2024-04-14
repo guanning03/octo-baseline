@@ -6,6 +6,9 @@ To run this example, first download and extract the dataset from here: https://r
 
 python examples/02_finetune_new_observation_action.py --pretrained_path=hf://rail-berkeley/octo-small --data_dir=...
 """
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '9'
+
 from absl import app, flags, logging
 import flax
 import jax
@@ -50,7 +53,7 @@ flags.DEFINE_bool(
 def main(_):
     assert (
         FLAGS.batch_size % jax.device_count() == 0
-    ), "Batch size must be divisible by device count."
+    ), f"Batch size must be divisible by device count. Batch Size: {FLAGS.batch_size}, Device Count: {jax.device_count()}"
 
     initialize_compilation_cache()
     # prevent tensorflow from using GPU memory since it's only used for data loading

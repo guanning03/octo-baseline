@@ -1,5 +1,5 @@
 gym >= 0.26
-numpy == 1.24.3
+numpy == 1.24.1
 ml_dtypes == 0.2.0
 chex == 0.1.85
 optax == 0.1.5
@@ -26,3 +26,4 @@ dlimp @ git+https://github.com/kvablack/dlimp@d08da3852c149548aaa8551186d619d873
 plotly >= 5.16.1
 matplotlib
 ipykernel
+scipy == 1.11.0

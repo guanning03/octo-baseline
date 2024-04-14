@@ -247,6 +247,7 @@ def normalize_action_and_proprio(
                 )
             keys_to_normalize.pop(skip_key)
 
+    ### 只有绝对的动作才会被归一化
     if normalization_type == NormalizationType.NORMAL:
         # normalize to mean 0, std 1
         for key, traj_key in keys_to_normalize.items():

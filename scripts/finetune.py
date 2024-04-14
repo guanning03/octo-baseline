@@ -44,7 +44,7 @@ except ImportError:
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string("name", "experiment", "Experiment name.")
-flags.DEFINE_bool("debug", False, "Debug config (no wandb logging)")
+flags.DEFINE_bool("debug", True, "Debug config (no wandb logging)")
 
 default_config_file = os.path.join(
     os.path.dirname(__file__), "configs/finetune_config.py"
@@ -173,6 +173,10 @@ def main(_):
         del FLAGS.config["dataset_kwargs"]["standardize_fn"]
         FLAGS.config["dataset_kwargs"]["standardize_fn"] = standardize_fn
 
+
+    ### TODO: 研究这个dataset变量的结构
+    ### 与aloha_mobile.py中加载出的dataset做对比
+    ### 思考，如果aloha_mobile.py想加载到octo中，双方各自要做什么变化
     dataset = make_single_dataset(
         FLAGS.config.dataset_kwargs,
         traj_transform_kwargs=FLAGS.config.traj_transform_kwargs,

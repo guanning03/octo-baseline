@@ -17,6 +17,7 @@ def get_config(config_string="full,multimodal"):
     # first image key should be the third-person view (None if not used)
     # and second image key should be the wrist view (None if not used)
 
+    ### 这个就是传给 make_single_dataset 的第一个参数
     FINETUNING_KWARGS = {
         "name": "bridge_dataset",
         "data_dir": "./tests/debug_dataset",

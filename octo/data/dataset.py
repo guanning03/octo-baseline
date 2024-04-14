@@ -184,6 +184,7 @@ def apply_frame_transforms(
         num_parallel_calls,
     )
 
+    ### 在训练的数据集中需要进行图像增强，例如HSV Space中添加一些随机性
     if train:
         # augment all images with the same seed, skipping padding images
         def aug(frame: dict):
@@ -300,7 +301,8 @@ def make_dataset_from_rlds(
         # apply a standardization function, if provided
         if standardize_fn is not None:
             traj = standardize_fn(traj)
-
+        
+        ### 检查是不是缺少observation或者action字段
         if not all(k in traj for k in REQUIRED_KEYS):
             raise ValueError(
                 f"Trajectory is missing keys: {REQUIRED_KEYS - set(traj.keys())}. "
@@ -311,9 +313,13 @@ def make_dataset_from_rlds(
         traj_len = tf.shape(traj["action"])[0]
         old_obs = traj["observation"]
         new_obs = {}
+        
+        ### 对于所有的obs_keys：
         for new, old in image_obs_keys.items():
+            ### 如果旧的不存在，则说明新的"image_{new}"键的值需要用padding填充
             if old is None:
                 new_obs[f"image_{new}"] = tf.repeat("", traj_len)  # padding
+            ### 如果旧的存在，则用对应的旧的内容作为新的"image_{new}"键的内容
             else:
                 new_obs[f"image_{new}"] = old_obs[old]
 
@@ -322,7 +328,8 @@ def make_dataset_from_rlds(
                 new_obs[f"depth_{new}"] = tf.repeat("", traj_len)  # padding
             else:
                 new_obs[f"depth_{new}"] = old_obs[old]
-
+        
+        ### state_obs_keys是一个列表
         if state_obs_keys:
             new_obs["proprio"] = tf.concat(
                 [
@@ -333,6 +340,7 @@ def make_dataset_from_rlds(
                 ],
                 axis=1,
             )
+        ### 输出的new_obs['proprio']的shape是[traj_len, len(state_obs_keys)]
 
         # add timestep info
         new_obs["timestep"] = tf.range(traj_len)
@@ -360,11 +368,14 @@ def make_dataset_from_rlds(
                     f"Length of absolute_action_mask ({len(absolute_action_mask)}) "
                     f"does not match action dimension ({traj['action'].shape[-1]})."
                 )
+                
+            ### absolute_action_mask是长为14的列表(在aloha数据集中)
+            ### traj['absolute_action_mask']的shape是[traj_len, 14]
             traj["absolute_action_mask"] = tf.tile(
                 tf.convert_to_tensor(absolute_action_mask, dtype=tf.bool)[None],
                 [traj_len, 1],
             )
-
+            
         return traj
 
     builder = tfds.builder(name, data_dir=data_dir)
@@ -414,6 +425,8 @@ def make_dataset_from_rlds(
     dataset = dl.DLataset.from_rlds(
         builder, split=split, shuffle=shuffle, num_parallel_reads=num_parallel_reads
     )
+    ### TODO: 尝试从这里开始，重构这个函数，但是输出要和原来函数的意图相对齐
+    ### dataset用aloha_mobile的返回来替代
     for filter_fcn_spec in filter_functions:
         dataset = dataset.filter(ModuleSpec.instantiate(filter_fcn_spec))
     dataset = dataset.traj_map(restructure, num_parallel_calls)
