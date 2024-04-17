@@ -1,3 +1,14 @@
+# 配环境方法
+
+cuda版本12.1
+
+cudnn版本8.9.7
+
+python 3.10.14
+
+`pip list`的输出见`./inf-req.txt`
+
+
 # Octo
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1z0vELj_lX9OWeoMG_WvXnQs43aPOEAhz?usp=sharing)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

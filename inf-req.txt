@@ -22,6 +22,7 @@ decorator                    4.4.2
 distlib                      0.3.8
 distrax                      0.1.5
 dlimp                        0.0.1
+dm-reverb                    0.14.0
 dm-tree                      0.1.8
 docker-pycreds               0.4.0
 einops                       0.7.0
@@ -66,6 +67,7 @@ MarkupSafe                   2.1.5
 matplotlib                   3.8.4
 matplotlib-inline            0.1.6
 mdurl                        0.1.2
+mediapy                      1.2.0
 ml-collections               0.1.1
 ml-dtypes                    0.2.0
 moviepy                      1.0.3
@@ -85,6 +87,7 @@ nvidia-cusparse-cu11         11.7.5.86
 nvidia-nccl-cu11             2.21.5
 oauthlib                     3.2.2
 octo                         0.0.0                 /data3/zhuxiaopei/octo-baseline
+opencv-python                4.9.0.80
 OpenEXR                      3.2.4
 opt-einsum                   3.3.0
 optax                        0.1.5
@@ -96,6 +99,7 @@ pillow                       10.3.0
 pip                          23.3.1
 platformdirs                 4.2.0
 plotly                       5.20.0
+portpicker                   1.6.0
 pre-commit                   3.3.3
 proglog                      0.1.10
 promise                      2.3
@@ -115,6 +119,7 @@ regex                        2023.12.25
 requests                     2.31.0
 requests-oauthlib            2.0.0
 rich                         13.7.1
+rlds                         0.1.8
 rsa                          4.9
 safetensors                  0.4.2
 scipy                        1.11.0
