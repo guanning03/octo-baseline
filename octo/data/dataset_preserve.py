@@ -2,13 +2,13 @@ from functools import partial
 import inspect
 import json
 from typing import Callable, Mapping, Optional, Sequence, Tuple, Union
-from .utils.format import pytree_display, dataset_display
+
 from absl import logging
 import dlimp as dl
 import numpy as np
 import tensorflow as tf
 import tensorflow_datasets as tfds
-import sys
+
 from octo.data import obs_transforms, traj_transforms
 from octo.data.utils import goal_relabeling, task_augmentation
 from octo.data.utils.data_utils import (
@@ -425,16 +425,7 @@ def make_dataset_from_rlds(
     dataset = dl.DLataset.from_rlds(
         builder, split=split, shuffle=shuffle, num_parallel_reads=num_parallel_reads
     )
-    print(dataset)
-    
-    # for step in dataset.take(1):
-    #     print(type(step)) # dict
-    #     # sys.exit(114514)
-    #     pytree_display(step)
-    #     sys.exit(114514)
-    #     pytree_display(step['observation']['state'])
-    # sys.exit(114514)
-    ### TODO: 从这里开始，重构这个函数，但是输出要和原来函数的意图相对齐
+    ### TODO: 尝试从这里开始，重构这个函数，但是输出要和原来函数的意图相对齐
     ### dataset用aloha_mobile的返回来替代
     for filter_fcn_spec in filter_functions:
         dataset = dataset.filter(ModuleSpec.instantiate(filter_fcn_spec))
@@ -448,17 +439,6 @@ def make_dataset_from_rlds(
         ),
         num_parallel_calls,
     )
-    
-    for step in dataset.take(1):
-        print(step['observation']['image_primary'][0])
-        sys.exit(1953)
-    # sys.exit(114514)
-    #     pytree_display(step)
-    #     # pytree_display(step['observation']['proprio'])
-    #     sys.exit(114514)
-        
-    ### TODO: 从这里开始，重构这个函数，但是输出要和原来函数的意图相对齐
-    ### dataset用aloha_mobile的返回来替代
 
     return dataset, dataset_statistics
 
@@ -484,14 +464,127 @@ def make_single_dataset(
     )
     # print(f'raw dataset statistics:\n{dataset_statistics}')
     dataset = apply_trajectory_transforms(dataset, **traj_transform_kwargs, train=train)
-    dataset_display(dataset)
     dataset = apply_frame_transforms(dataset, **frame_transform_kwargs, train=train)
-    dataset_display(dataset)
-    sys.exit(114514)
 
     # this seems to reduce memory usage without affecting speed
     dataset = dataset.with_ram_budget(1)
 
     # save for later
     dataset.dataset_statistics = dataset_statistics
+    return dataset
+
+
+def make_interleaved_dataset(
+    dataset_kwargs_list: Sequence[dict],
+    sample_weights: Optional[Sequence[float]] = None,
+    *,
+    train: bool,
+    shuffle_buffer_size: int,
+    traj_transform_kwargs: dict = {},
+    frame_transform_kwargs: dict = {},
+    dataset_statistics: Optional[Union[dict, str]] = None,
+    batch_size: Optional[int] = None,
+    balance_weights: bool = False,
+    traj_transform_threads: Optional[int] = None,
+    traj_read_threads: Optional[int] = None,
+) -> dl.DLataset:
+    """Creates an interleaved dataset from list of dataset kwargs. Returns a dataset of batched frames.
+
+    Args:
+        dataset_kwargs_list: list of kwargs, each element of which is passed to `make_dataset_from_rlds`.
+            "num_parallel_calls" and "num_parallel_reads" are overidden using `traj_transform_threads` and
+            `traj_read_threads`, respectively.
+        sample_weights: sampling weights for each dataset in list. If None, defaults to uniform.
+        train: whether this is a training or validation dataset.
+        shuffle_buffer_size: size of the dataset shuffle buffer (in number of frames).
+        traj_transform_kwargs: kwargs passed to `apply_trajectory_transforms`. "num_parallel_calls" is
+            overidden using `traj_transform_threads`.
+        frame_transform_kwargs: kwargs passed to `apply_frame_transforms`.
+        dataset_statistics: (dict|str, optional): dict (or path to JSON file) that contains dataset statistics
+            for normalization, see `make_dataset_from_rlds` for details. If set, applies *the same* normalization
+            statistics to all interleaved datasets. By default, each dataset is normalized by its own statistics.
+        batch_size: batch size, if not provided output is not batched.
+        balance_weights: if True, the sample weights are multiplied by the number of frames in each dataset.
+            This makes it so that, if all the sample weights are equal, one full iteration through the interleaved
+            dataset will correspond to one full iteration through each individual dataset (only in expectation,
+            since in practice the sampling is random).
+        traj_transform_threads: total number of parallel calls for trajectory transforms, distributed across
+            datasets according to their sampling weights. If None, defaults to AUTOTUNE for every dataset.
+        traj_read_threads: total number of parallel read workers for trajectory transforms, distributed across
+            datasets according to their sampling weights. If None, defaults to AUTOTUNE for every dataset.
+    """
+    # default to uniform sampling
+    if not sample_weights:
+        sample_weights = [1.0] * len(dataset_kwargs_list)
+    if len(sample_weights) != len(dataset_kwargs_list):
+        raise ValueError(
+            f"sample_weights must be None or have length {len(dataset_kwargs_list)}."
+        )
+
+    # go through datasets once to get sizes
+    dataset_sizes = []
+    all_dataset_statistics = []
+    for dataset_kwargs in dataset_kwargs_list:
+        _, per_dataset_stats = make_dataset_from_rlds(**dataset_kwargs, train=train)
+        dataset_sizes.append(per_dataset_stats["num_transitions"])
+        all_dataset_statistics.append(per_dataset_stats)
+
+    # balance and normalize weights
+    if balance_weights:
+        sample_weights = np.array(sample_weights) * np.array(dataset_sizes)
+    sample_weights = np.array(sample_weights) / np.sum(sample_weights)
+    pprint_data_mixture(dataset_kwargs_list, sample_weights)
+
+    # allocate threads based on weights
+    threads_per_dataset = allocate_threads(traj_transform_threads, sample_weights)
+    reads_per_dataset = allocate_threads(traj_read_threads, sample_weights)
+
+    logging.info("Threads per dataset: %s", threads_per_dataset)
+    logging.info("Reads per dataset: %s", reads_per_dataset)
+
+    # construct datasets
+    datasets = []
+    for dataset_kwargs, per_dataset_stats, threads, reads in zip(
+        dataset_kwargs_list,
+        all_dataset_statistics,
+        threads_per_dataset,
+        reads_per_dataset,
+    ):
+        dataset, _ = make_dataset_from_rlds(
+            **dataset_kwargs,
+            train=train,
+            num_parallel_calls=threads,
+            num_parallel_reads=reads,
+            dataset_statistics=dataset_statistics
+            if dataset_statistics is not None
+            else per_dataset_stats,
+        )
+        dataset = apply_trajectory_transforms(
+            dataset.repeat(),
+            **traj_transform_kwargs,
+            num_parallel_calls=threads,
+            train=train,
+        ).flatten(num_parallel_calls=threads)
+        datasets.append(dataset)
+
+    # interleave at the frame level and then shuffle
+    dataset: dl.DLataset = dl.DLataset.sample_from_datasets(
+        datasets, sample_weights
+    ).shuffle(shuffle_buffer_size)
+
+    # apply frame transforms
+    dataset = apply_frame_transforms(dataset, **frame_transform_kwargs, train=train)
+
+    # sequential batch (parallel batch seems to use much more memory)
+    if batch_size is not None:
+        dataset = dataset.batch(batch_size)
+
+    # this seems to reduce memory usage without affecting speed
+    dataset = dataset.with_ram_budget(1)
+
+    # save for later
+    dataset.dataset_statistics = (
+        dataset_statistics if dataset_statistics is not None else all_dataset_statistics
+    )
+    dataset.sample_weights = sample_weights
     return dataset

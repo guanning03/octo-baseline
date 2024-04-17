@@ -2,6 +2,9 @@ import tensorflow as tf
 from tensorflow_graphics.geometry.transformation.euler import from_quaternion
 from tensorflow_graphics.geometry.transformation.quaternion import from_euler
 
+import h5py
+import os
+
 
 def dataset_to_path(dataset_name: str, dir_name: str) -> str:
     """
@@ -79,3 +82,64 @@ def transform_to_euler(R: tf.Tensor) -> tf.Tensor:
 
     return tf.cond(singular, true_fn=handle_singular_case, false_fn=compute_angles)
 
+
+# CHUNK_SIZE = 5000
+# COL_NAMES = {
+#     "index": lambda x: tf.train.Feature(int64_list=tf.train.Int64List(value=[x])),
+#     "vals": lambda x:     tf.train.Feature(float_list=tf.train.FloatList(value=x.reshape(-1))),
+#     "vals_shape": lambda x: tf.train.Feature(int64_list=tf.train.Int64List(value=list(x.shape))),
+# }
+# DATASET_NAME = "data"
+
+# def write_tfrecords(file_path, features_list):
+#     with tf.python_io.TFRecordWriter(file_path) as writer:
+#         for features in features_list:
+#             writer.write(tf.train.Example(features=features).SerializeToString())
+
+# def hdf5_row_to_features(hdf5_row):
+#     feature_dict = dict()
+#     for col_name in COL_NAMES.keys():
+#         if col_name == "index" and hdf5_row["index"] % 100 == 0:
+#             print("index: %d" % hdf5_row["index"])
+#         feature_dict[col_name] = COL_NAMES[col_name](hdf5_row[col_name])
+#         if col_name == "vals":
+#             feature_dict["vals_shape"] = COL_NAMES["vals_shape"]    (hdf5_row[col_name])
+#     return tf.train.Features(feature=feature_dict)
+
+# def convert_records(file_path):
+#     dir_name = os.path.dirname(file_path)
+#     base_file_name = os.path.splitext(file_path)[0]
+#     tfrecord_file_name_template = "%s-%d.tfrecord"
+#     tfrecord_file_counter = 0
+
+#     hdf5_file = h5py.File(file_path, "r")
+#     features_list = list()
+#     index = 0
+#     print("Dataset size: %d" % hdf5_file[DATASET_NAME].size)
+#     while index < hdf5_file[DATASET_NAME].size:
+#         if index % 100 == 0:
+#             print("iteration index: %d" % index)
+#         features = hdf5_row_to_features(hdf5_file[DATASET_NAME][index])
+#         features_list.append(features)
+
+#         # Write chunk to file.
+#         if index % CHUNK_SIZE == 0 and index != 0:
+#             write_tfrecords(
+#                 os.path.join(
+#                     # dir_name,
+#                     tfrecord_file_name_template % (base_file_name, tfrecord_file_counter)),
+#                 features_list)
+#             tfrecord_file_counter += 1
+#             features_list = list()
+#         index += 1
+
+#     # Write remainder to file.
+#     if index % CHUNK_SIZE != 0:
+#         write_tfrecords(
+#             os.path.join(
+#                 # dir_name,
+#                 tfrecord_file_name_template % (base_file_name,     tfrecord_file_counter)),
+#             features_list)
+
+#     print("Dataset size: %d" % hdf5_file[DATASET_NAME].size)
+#     hdf5_file.close()
