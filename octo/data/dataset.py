@@ -427,13 +427,6 @@ def make_dataset_from_rlds(
     )
     print(dataset)
     
-    # for step in dataset.take(1):
-    #     print(type(step)) # dict
-    #     # sys.exit(114514)
-    #     pytree_display(step)
-    #     sys.exit(114514)
-    #     pytree_display(step['observation']['state'])
-    # sys.exit(114514)
     ### TODO: 从这里开始，重构这个函数，但是输出要和原来函数的意图相对齐
     ### dataset用aloha_mobile的返回来替代
     for filter_fcn_spec in filter_functions:
@@ -448,17 +441,14 @@ def make_dataset_from_rlds(
         ),
         num_parallel_calls,
     )
-    
-    for step in dataset.take(1):
-        print(step['observation']['image_primary'][0])
-        sys.exit(1953)
-    # sys.exit(114514)
-    #     pytree_display(step)
-    #     # pytree_display(step['observation']['proprio'])
-    #     sys.exit(114514)
         
     ### TODO: 从这里开始，重构这个函数，但是输出要和原来函数的意图相对齐
     ### dataset用aloha_mobile的返回来替代
+    
+    dataset_display(dataset)
+    for step in dataset.take(1):
+        print(step['observation']['image_primary'])
+    sys.exit(114514)
 
     return dataset, dataset_statistics
 
@@ -484,10 +474,7 @@ def make_single_dataset(
     )
     # print(f'raw dataset statistics:\n{dataset_statistics}')
     dataset = apply_trajectory_transforms(dataset, **traj_transform_kwargs, train=train)
-    dataset_display(dataset)
     dataset = apply_frame_transforms(dataset, **frame_transform_kwargs, train=train)
-    dataset_display(dataset)
-    sys.exit(114514)
 
     # this seems to reduce memory usage without affecting speed
     dataset = dataset.with_ram_budget(1)
