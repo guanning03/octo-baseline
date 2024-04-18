@@ -1,8 +1,11 @@
 from ml_collections import ConfigDict
 from ml_collections.config_dict import FieldReference, placeholder
+import os
+from datetime import datetime
 
+CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
-def get_config(config_string="full,multimodal"):
+def get_config(config_string="full,language_conditioned"):
     mode, task = config_string.split(",")
     
     ### task中是否包含文字/图片指令
@@ -19,21 +22,32 @@ def get_config(config_string="full,multimodal"):
 
     ### 这个就是传给 make_single_dataset 的第一个参数
     FINETUNING_KWARGS = {
-        "name": "bridge_dataset",
-        "data_dir": "./tests/debug_dataset",
-        "image_obs_keys": {"primary": "image_0", "wrist": None},
-        "state_obs_keys": ["state", None],
-        "language_key": "language_instruction",
+        "name": "cobot_magic",
+        "data_dir": "~/autodl-tmp/",
+        "train_ratio": 0.85,
+        "image_obs_keys": {"primary": "cam_high", 
+                           "wrist_left": "cam_left_wrist", 
+                           "wrist_right": "cam_right_wrist"
+                           "proprio"},
+        "state_obs_keys": ["qpos", "qvel"],
+        "language_key": "instruction",
         "action_proprio_normalization_type": "normal",
         # All actions are relative deltas, except for the last one (gripper) which is absolute
         # Specifying this is only necessary if you want to predict > 1 step into the future
-        "absolute_action_mask": [False, False, False, False, False, False, True],
+        "absolute_action_mask": [True, True, True, True, True, True, True,
+                                 True, True, True, True, True, True, True],
         # standardize_fn is dynamically loaded from a file
         # for example: "experiments/kevin/custom_standardization_transforms.py:aloha_dataset_transform"
-        "standardize_fn": "octo/data/oxe/oxe_standardization_transforms.py:bridge_dataset_transform",
+        "standardize_fn": "octo/data/cobot/standardize.py:standardize_fn",
         # If the default data loading speed is too slow, try these:
         # "num_parallel_reads": 8,  # for reading from disk / GCS
         # "num_parallel_calls": 16,  # for initial dataset construction
+        "action_normalization_mask":[True, True, True, True, True, True, False,
+                                     True, True, True, True, True, True, False],
+        "proprio_normalization_mask":[True, True, True, True, True, True, False,
+                                      True, True, True, True, True, True, False,
+                                      True, True, True, True, True, True, True,
+                                      True, True, True, True, True, True, True]
     }
 
     if mode == "full":
@@ -52,21 +66,21 @@ def get_config(config_string="full,multimodal"):
         raise ValueError("Invalid mode")
 
     max_steps = FieldReference(50000)
-    window_size = FieldReference(default=1)
+    window_size = FieldReference(default=3)
 
     config = dict(
-        pretrained_path=placeholder(str),
-        pretrained_step=placeholder(int),
+        pretrained_path='/root/autodl-tmp/octo-small',
+        pretrained_step=270000,
         batch_size=256,
         shuffle_buffer_size=10000,
         num_steps=max_steps,
         log_interval=100,
         eval_interval=5000,
         save_interval=5000,
-        save_dir=placeholder(str),
+        save_dir=os.path.join(os.path.dirname(__file__), f'./../../runs/{CURRENT_TIME}'),
         seed=42,
         wandb=dict(
-            project="octo_finetune", group=placeholder(str), entity=placeholder(str)
+            project="octo_cobot", group=placeholder(str), entity=placeholder(str)
         ),
         dataset_kwargs=FINETUNING_KWARGS,
         modality=task,
@@ -149,8 +163,9 @@ def get_config(config_string="full,multimodal"):
     )
     frame_transform_kwargs = dict(
         resize_size={
-            "primary": (256, 256),  # workspace (3rd person) camera is at 256x256
-            "wrist": (128, 128),  # wrist camera is at 128x128
+            "primary": (640, 480),  # workspace (3rd person) camera is at 256x256
+            "wrist_left": (640, 480),  # wrist camera is at 128x128
+            "wrist_right": (640, 480)
         },
         image_augment_kwargs=[
             workspace_augment_kwargs,

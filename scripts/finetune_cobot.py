@@ -13,7 +13,7 @@ import optax
 import tensorflow as tf
 import tqdm
 import wandb
-
+from octo.model.components.tokenizers import LowdimObsTokenizer
 from octo.data.dataset import make_single_dataset
 from octo.model.octo_model import OctoModel
 from octo.utils.jax_utils import initialize_compilation_cache
@@ -47,7 +47,7 @@ flags.DEFINE_string("name", "experiment", "Experiment name.")
 flags.DEFINE_bool("debug", True, "Debug config (no wandb logging)")
 
 default_config_file = os.path.join(
-    os.path.dirname(__file__), "configs/finetune_config.py"
+    os.path.dirname(__file__), "configs/finetune_config_cobot.py"
 )
 config_flags.DEFINE_config_file(
     "config",
@@ -173,10 +173,6 @@ def main(_):
         del FLAGS.config["dataset_kwargs"]["standardize_fn"]
         FLAGS.config["dataset_kwargs"]["standardize_fn"] = standardize_fn
 
-
-    ### TODO: 研究这个dataset变量的结构
-    ### 与aloha_mobile.py中加载出的dataset做对比
-    ### 思考，如果aloha_mobile.py想加载到octo中，双方各自要做什么变化
     dataset = make_single_dataset(
         FLAGS.config.dataset_kwargs,
         traj_transform_kwargs=FLAGS.config.traj_transform_kwargs,
@@ -198,6 +194,20 @@ def main(_):
     # Load Pretrained Model
     #
     #########
+    
+    config["model"]["observation_tokenizers"]["proprio"] = ModuleSpec.create(
+        LowdimObsTokenizer,
+        n_bins=256,
+        bin_type="normal",
+        low=-2.0,
+        high=2.0,
+        obs_keys=["proprio"],
+    )
+    config["model"]["observation_tokenizers"]["wrist_left"] = config["model"]["observation_tokenizers"]["wrist"]
+    config["model"]["observation_tokenizers"]["wrist_right"] = config["model"]["observation_tokenizers"]["wrist"]
+    del config["model"]["observation_tokenizers"]["wrist"]
+    
+    logging.info("Updating model for new observation & action spaces...")
 
     rng = jax.random.PRNGKey(FLAGS.config.seed)
     rng, init_rng = jax.random.split(rng)

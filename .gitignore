@@ -171,4 +171,4 @@ weights/
 
 # *.ipynb
 
-runs-*/
+runs/

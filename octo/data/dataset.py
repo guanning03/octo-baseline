@@ -9,6 +9,7 @@ from dlimp.dataset import _wrap
 import numpy as np
 import tensorflow as tf
 import tensorflow_datasets as tfds
+from datetime import datetime
 import sys
 from octo.data import obs_transforms, traj_transforms
 from octo.data.utils import goal_relabeling, task_augmentation
@@ -481,6 +482,7 @@ def make_dataset_from_rlds2(
     data_dir: str,
     *,
     train: bool,
+    train_ratio: float,
     standardize_fn: Optional[Callable[[dict], dict]] = None,
     shuffle: bool = True,
     image_obs_keys: Mapping[str, Optional[str]] = {},
@@ -491,6 +493,7 @@ def make_dataset_from_rlds2(
     dataset_statistics: Optional[Union[dict, str]] = None,
     absolute_action_mask: Optional[Sequence[bool]] = None,
     action_normalization_mask: Optional[Sequence[bool]] = None,
+    proprio_normalization_mask: Optional[Sequence[bool]] = None,
     norm_skip_keys: Optional[Sequence[str]] = None,
     filter_functions: Sequence[ModuleSpec] = (),
     num_parallel_reads: int = tf.data.AUTOTUNE,
@@ -522,6 +525,7 @@ def make_dataset_from_rlds2(
         name (str): The name of the RLDS dataset (usually "name" or "name:version").
         data_dir (str): The path to the data directory.
         train (bool): Whether to use the training or validation split.
+        train_ratio (float): The ratio of training data to use. (1 - train_ratio) will be used for validation.
         shuffle (bool, optional): Whether to shuffle the file read order (does NOT fully shuffle the dataset,
             since one file usually contains many trajectories!).
         standardize_fn (Callable[[dict], dict], optional): A function that, if provided, will be the first
@@ -553,6 +557,9 @@ def make_dataset_from_rlds2(
         action_normalization_mask (Sequence[bool], optional): If provided, indicates which action dimensions
             should be normalized. For example, you might not want to normalize the gripper action dimension if
             it's always exactly 0 or 1. By default, all action dimensions are normalized.
+        proprio_normalization_mask (Sequence[bool], optional): If provided, indicates which proprio dimensions
+            should be normalized. For example, you might not want to normalize the gripper proprio dimension if
+            it's always exactly 0 or 1. By default, all proprio dimensions are normalized.
         norm_skip_keys (Sequence[str], optional): Provided keys will be skipped during normalization.
         filter_functions (Sequence[ModuleSpec]): ModuleSpecs for filtering functions applied to the
             raw dataset.
@@ -656,34 +663,24 @@ def make_dataset_from_rlds2(
             )
             
         return traj
+    
+    full_dataset = _wrap(load_dataset_from_hdf5, False)(os.path.join(data_dir, name))
+    if shuffle:
+        full_dataset = full_dataset.shuffle(buffer_size=1000)
+    full_dataset = full_dataset.traj_map(restructure, num_parallel_calls)
 
-    builder = tfds.builder(name, data_dir=data_dir)
-
-    # load or compute dataset statistics
     if isinstance(dataset_statistics, str):
         with tf.io.gfile.GFile(dataset_statistics, "r") as f:
             dataset_statistics = json.load(f)
-    elif dataset_statistics is None:
-        full_dataset = dl.DLataset.from_rlds(
-            builder, split="all", shuffle=False, num_parallel_reads=num_parallel_reads
-        )
-        for filter_fcn_spec in filter_functions:
-            full_dataset = full_dataset.filter(ModuleSpec.instantiate(filter_fcn_spec))
-        full_dataset = full_dataset.traj_map(restructure, num_parallel_calls)
-        # tries to load from cache, otherwise computes on the fly
+    else:
         dataset_statistics = get_dataset_statistics(
             full_dataset,
-            hash_dependencies=(
-                str(builder.info),
-                str(state_obs_keys),
-                inspect.getsource(standardize_fn) if standardize_fn is not None else "",
-                *map(ModuleSpec.to_string, filter_functions),
-            ),
-            save_dir=builder.data_dir,
+            hash_dependencies = f"{str(state_obs_keys)} {datetime.now().strftime('%Y-%m-%d')}",
+            save_dir=data_dir
         )
     dataset_statistics = tree_map(np.array, dataset_statistics)
-
-    # skip normalization for certain action dimensions
+    
+    # skip normalization for certain action and proprio dimensions
     if action_normalization_mask is not None:
         if (
             len(action_normalization_mask)
@@ -694,33 +691,23 @@ def make_dataset_from_rlds2(
                 f"does not match action dimension ({dataset_statistics['action']['mean'].shape[-1]})."
             )
         dataset_statistics["action"]["mask"] = np.array(action_normalization_mask)
-
-    print(builder.info.splits)
-    print(train)
-    # construct the dataset
-    # if "val" not in builder.info.splits:
-    #     split = "train[:95%]" if train else "train[95%:]"
-    # else:
-    #     split = "train" if train else "val"
-    
-    full_dataset = _wrap(load_dataset_from_hdf5, False)(os.path.join(data_dir, name)).shuffle(10000)
-
-    dataset = dl.DLataset.from_rlds(
-        builder, split=split, shuffle=shuffle, num_parallel_reads=num_parallel_reads
-    )
-    print(dataset)
-    
-    ### TODO: 从这里开始，重构这个函数，但是输出要和原来函数的意图相对齐
-    ### dataset用aloha_mobile的返回来替代
-    for filter_fcn_spec in filter_functions:
-        dataset = dataset.filter(ModuleSpec.instantiate(filter_fcn_spec))
+    if proprio_normalization_mask is not None:
+        if (
+            len(proprio_normalization_mask)
+            != dataset_statistics["proprio"]["mean"].shape[-1]
+        ):
+            raise ValueError(
+                f"Length of skip_normalization_mask ({len(proprio_normalization_mask)}) "
+                f"does not match proprio dimension ({dataset_statistics['proprio']['mean'].shape[-1]})."
+            )
+        dataset_statistics["proprio"]["mask"] = np.array(proprio_normalization_mask)
         
-    dataset_display(dataset)
-    dataset = dataset.traj_map(restructure, num_parallel_calls)
-    dataset_display(dataset)
     
-    ### FIXME: 从这个位置开始
-    
+    train_num = int(len(full_dataset) * train_ratio)
+    if train:
+        dataset = full_dataset.take(train_num)
+    else:
+        dataset = full_dataset.skip(train_num)
     
     dataset = dataset.traj_map(
         partial(
@@ -729,16 +716,8 @@ def make_dataset_from_rlds2(
             normalization_type=action_proprio_normalization_type,
             skip_keys=norm_skip_keys,
         ),
-        num_parallel_calls,
     )
     dataset_display(dataset)
-    ### TODO: 从这里开始，重构这个函数，但是输出要和原来函数的意图相对齐
-    ### dataset用aloha_mobile的返回来替代
-    
-    # dataset_display(dataset)
-    # for step in dataset.take(1):
-    #     print(step['observation']['image_primary'])
-    # sys.exit(114514)
 
     return dataset, dataset_statistics
 
