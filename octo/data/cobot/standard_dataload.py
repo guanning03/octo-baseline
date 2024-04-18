@@ -10,6 +10,7 @@ import os
 import imageio
 import concurrent.futures
 import fnmatch
+from dlimp.dataset import _wrap
 import cv2
 import sys
 
