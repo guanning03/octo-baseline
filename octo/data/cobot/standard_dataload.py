@@ -49,9 +49,14 @@ def load_dataset_from_hdf5(hdf5_path):
             # Batch the entire dataset from one file
             return dataset.batch(10**10)
 
+    all_files = []
     all_datasets = []
-    for root, dirs, files in os.walk(hdf5_path):
-        for filename in fnmatch.filter(files, '*.hdf5'):
+    
+    for root, _, files in os.walk(hdf5_path):
+        all_files.extend([os.path.expanduser(os.path.join(root, filename)) 
+                          for filename in fnmatch.filter(files, '*.hdf5')])
+
+    for filename in tqdm(all_files, desc = "Loading HDF5 files"):
             filepath = os.path.join(root, filename)
             dataset = load_and_parse(filepath)
             all_datasets.append(dataset)
@@ -102,9 +107,14 @@ def load_dataset_from_tfrecords(tfrecord_path):
         parsed_dataset = raw_dataset.map(_parse_function).batch(10**10)
         return parsed_dataset
 
+    all_files = []
     all_datasets = []
-    for root, dirs, files in os.walk(tfrecord_path):
-        for filename in fnmatch.filter(files, '*.tfrecord'):
+    
+    for root, _, files in os.walk(tfrecord_path):
+        all_files.extend([os.path.expanduser(os.path.join(root, filename)) 
+                          for filename in fnmatch.filter(files, '*.tfrecord')])
+        
+    for filename in tqdm(all_files, desc = "Loading TFRecord files"):
             filepath = os.path.join(root, filename)
             dataset = load_and_parse(filepath)
             all_datasets.append(dataset)

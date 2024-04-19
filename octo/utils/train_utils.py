@@ -347,6 +347,7 @@ def create_optimizer(
 
 def check_config_diff(new_conf: Config, old_conf: Config, silent: bool = False):
     """Checks for differences between new config and old config dicts."""
+    logging.info("Checking for differences between new and old configs.")
     new_conf_flat = flax.traverse_util.flatten_dict(
         new_conf.to_dict() if isinstance(new_conf, ConfigDict) else new_conf
     )

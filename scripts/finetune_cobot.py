@@ -2,7 +2,7 @@ import datetime
 from functools import partial
 import imp
 import os
-
+import json
 from absl import app, flags, logging
 import flax
 from flax.traverse_util import flatten_dict
@@ -33,7 +33,7 @@ from octo.utils.train_utils import (
     Timer,
     TrainState,
 )
-
+from octo.model.components.action_heads import DiffusionActionHead
 try:
     from jax_smi import initialise_tracking  # type: ignore
 
@@ -44,7 +44,7 @@ except ImportError:
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string("name", "experiment", "Experiment name.")
-flags.DEFINE_bool("debug", True, "Debug config (no wandb logging)")
+flags.DEFINE_bool("debug", False, "Debug config (no wandb logging)") ### 默认设成False，便于wandb显示
 
 default_config_file = os.path.join(
     os.path.dirname(__file__), "configs/finetune_config_cobot.py"
@@ -141,9 +141,13 @@ def main(_):
             if ".".join(c_key).startswith(".".join(d_key)):
                 del flat_config[c_key]
 
+    ### FLAG.config是finetune的config
+    ### 这个config是pretrained model的config
     config = ConfigDict(flax.traverse_util.unflatten_dict(flat_config))
     config.update(FLAGS.config.get("update_config", ConfigDict()))
     config = config.to_dict()
+    
+    ### 检查模型config因为update_config和config_delete_keys的影响
     check_config_diff(config, pretrained_model.config)
 
     #########
@@ -164,6 +168,7 @@ def main(_):
         return batch
 
     # load standardize_fn from `path/to/file.py:fn_name` format
+    ### 把standardize_fn函数解码出来，便于之后传参数给make_single_dataset
     if (
         standardize_fn := FLAGS.config["dataset_kwargs"].get("standardize_fn", None)
     ) is not None:
@@ -173,12 +178,14 @@ def main(_):
         del FLAGS.config["dataset_kwargs"]["standardize_fn"]
         FLAGS.config["dataset_kwargs"]["standardize_fn"] = standardize_fn
 
+    logging.info("Loading dataset, Please be patient...")
     dataset = make_single_dataset(
         FLAGS.config.dataset_kwargs,
         traj_transform_kwargs=FLAGS.config.traj_transform_kwargs,
         frame_transform_kwargs=FLAGS.config.frame_transform_kwargs,
         train=True,
     )
+    logging.info('Dataset loaded successfully. Start batching, please be patient ...')
     train_data_iter = (
         dataset.repeat()
         .unbatch()
@@ -188,13 +195,14 @@ def main(_):
     )
     train_data_iter = map(process_batch, train_data_iter)
     example_batch = next(train_data_iter)
-
+    logging.info('Training data iteration loaded successfully')
     #########
     #
     # Load Pretrained Model
     #
     #########
     
+    #TODO: 需要在这里把模型结构按照所提供的数据形式进行修改
     config["model"]["observation_tokenizers"]["proprio"] = ModuleSpec.create(
         LowdimObsTokenizer,
         n_bins=256,
@@ -207,6 +215,16 @@ def main(_):
     config["model"]["observation_tokenizers"]["wrist_right"] = config["model"]["observation_tokenizers"]["wrist"]
     del config["model"]["observation_tokenizers"]["wrist"]
     
+    config["model"]["heads"]['action'] = ModuleSpec.create(
+        DiffusionActionHead,
+        readout_key="readout_action",
+        use_map = False,
+        pred_horizon = 4,
+        action_dim = 14
+    )
+    
+    print(f'model config: {json.dumps(config["model"], indent = 4)}')
+    
     logging.info("Updating model for new observation & action spaces...")
 
     rng = jax.random.PRNGKey(FLAGS.config.seed)
@@ -216,6 +234,7 @@ def main(_):
         example_batch,
         text_processor,
         rng=init_rng,
+        verbose = True,
         dataset_statistics=dataset.dataset_statistics,
     )
     merged_params = merge_params(model.params, pretrained_model.params)
@@ -228,6 +247,7 @@ def main(_):
     #
     #########
 
+    logging.info('Setting optimizer and training state...')
     params = model.params
     if FLAGS.config.optimizer.frozen_keys is None:
         FLAGS.config.optimizer.frozen_keys = model.config["optimizer"]["frozen_keys"]
@@ -337,6 +357,8 @@ def main(_):
     # Build validation & visualization callbacks
     #
     #########
+    
+    logging.info('Building validation and visualization callbacks...')
 
     if FLAGS.config.modality == "image_conditioned":
         modes_to_evaluate = ["image_conditioned"]
@@ -373,23 +395,25 @@ def main(_):
     #
     #########
 
-    if "rollout_kwargs" in FLAGS.config:
-        rollout_callback = RolloutVisualizationCallback(
-            text_processor=text_processor,
-            history_length=FLAGS.config["window_size"],
-            model_pred_horizon=config["model"]["heads"]["action"]["kwargs"].get(
-                "pred_horizon", 1
-            ),
-            **FLAGS.config.rollout_kwargs.to_dict(),
-        )
-    else:
-        rollout_callback = None
+    # if "rollout_kwargs" in FLAGS.config:
+    #     rollout_callback = RolloutVisualizationCallback(
+    #         text_processor=text_processor,
+    #         history_length=FLAGS.config["window_size"],
+    #         model_pred_horizon=config["model"]["heads"]["action"]["kwargs"].get(
+    #             "pred_horizon", 1
+    #         ),
+    #         **FLAGS.config.rollout_kwargs.to_dict(),
+    #     )
+    # else:
+    #     rollout_callback = None
 
     #########
     #
     # Train loop
     #
     #########
+    
+    logging.info('Starting training!!!')
 
     def wandb_log(info, step):
         wandb.log(flatten_dict(info, sep="/"), step=step)
@@ -423,14 +447,14 @@ def main(_):
                 val_metrics = val_callback(train_state, i + 1)
                 wandb_log(val_metrics, step=i)
 
-            with timer("visualize"):
-                viz_metrics = viz_callback(train_state, i + 1)
-                wandb_log(viz_metrics, step=i)
+            # with timer("visualize"):
+            #     viz_metrics = viz_callback(train_state, i + 1)
+            #     wandb_log(viz_metrics, step=i)
 
-            if rollout_callback is not None:
-                with timer("rollout"):
-                    rollout_metrics = rollout_callback(train_state, i + 1)
-                    wandb_log(rollout_metrics, step=i)
+            # if rollout_callback is not None:
+            #     with timer("rollout"):
+            #         rollout_metrics = rollout_callback(train_state, i + 1)
+            #         wandb_log(rollout_metrics, step=i)
 
         if (i + 1) % FLAGS.config.save_interval == 0 and save_dir is not None:
             logging.info("Saving checkpoint...")

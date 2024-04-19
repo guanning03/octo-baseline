@@ -462,7 +462,7 @@ def plot_trajectory_actions(
 
     # TODO: make this less hardcoded
     proprio = np.concatenate(
-        [proprio[..., 1:7], proprio[..., -1:]], axis=-1
+        [proprio[..., 0:14]], axis=-1
     )  # extract proprio
 
     fig = go.Figure()

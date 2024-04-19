@@ -7,7 +7,7 @@ To run this example, first download and extract the dataset from here: https://r
 python examples/02_finetune_new_observation_action.py --pretrained_path=hf://rail-berkeley/octo-small --data_dir=...
 """
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '9'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '9'
 
 from absl import app, flags, logging
 import flax

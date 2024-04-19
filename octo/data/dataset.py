@@ -24,6 +24,7 @@ from octo.data.utils.data_utils import (
 from octo.utils.spec import ModuleSpec
 from .cobot.standard_dataload import load_dataset_from_hdf5, load_dataset_from_tfrecords
 import os
+from tqdm import tqdm
 
 
 def apply_trajectory_transforms(
@@ -303,7 +304,7 @@ def make_dataset_from_rlds(
 
     def restructure(traj):
         
-        print('traj', traj)
+        # print('traj', traj)
         # apply a standardization function, if provided
         if standardize_fn is not None:
             traj = standardize_fn(traj)
@@ -320,7 +321,7 @@ def make_dataset_from_rlds(
         old_obs = traj["observation"]
         new_obs = {}
         
-        print('image_obs_keys', image_obs_keys)
+        # print('image_obs_keys', image_obs_keys)
         
         ### 对于所有的obs_keys：
         for new, old in image_obs_keys.items():
@@ -339,7 +340,7 @@ def make_dataset_from_rlds(
         
         ### state_obs_keys是一个列表
         ### cobot的state_obs_keys应该是['qpos', 'qvel']
-        print('state_obs_keys', state_obs_keys)
+        # print('state_obs_keys', state_obs_keys)
         if state_obs_keys:
             new_obs["proprio"] = tf.concat(
                 [
@@ -432,8 +433,8 @@ def make_dataset_from_rlds(
         
     pytree_display(dataset_statistics)
 
-    print(builder.info.splits)
-    print(train)
+    # print(builder.info.splits)
+    # print(train)
     # construct the dataset
     if "val" not in builder.info.splits:
         split = "train[:95%]" if train else "train[95%:]"
@@ -443,16 +444,16 @@ def make_dataset_from_rlds(
     dataset = dl.DLataset.from_rlds(
         builder, split=split, shuffle=shuffle, num_parallel_reads=num_parallel_reads
     )
-    print(dataset)
+    # print(dataset)
     
     ### TODO: 从这里开始，重构这个函数，但是输出要和原来函数的意图相对齐
     ### dataset用aloha_mobile的返回来替代
     for filter_fcn_spec in filter_functions:
         dataset = dataset.filter(ModuleSpec.instantiate(filter_fcn_spec))
         
-    dataset_display(dataset)
+    # dataset_display(dataset)
     dataset = dataset.traj_map(restructure, num_parallel_calls)
-    dataset_display(dataset)
+    # dataset_display(dataset)
     
     ### FIXME: 从这个位置开始
     
@@ -477,7 +478,7 @@ def make_dataset_from_rlds(
     return dataset, dataset_statistics
 
 
-def make_dataset_from_rlds2(
+def make_dataset_from_rlds(
     name: str,
     data_dir: str,
     *,
@@ -664,9 +665,9 @@ def make_dataset_from_rlds2(
             
         return traj
     
-    full_dataset = _wrap(load_dataset_from_hdf5, False)(os.path.join(data_dir, name))
+    full_dataset = _wrap(load_dataset_from_hdf5, False)(os.path.expanduser(os.path.join(data_dir, name)))
     if shuffle:
-        full_dataset = full_dataset.shuffle(buffer_size=1000)
+        full_dataset = full_dataset.shuffle(buffer_size=100000, seed=114514)
     full_dataset = full_dataset.traj_map(restructure, num_parallel_calls)
 
     if isinstance(dataset_statistics, str):
@@ -676,7 +677,7 @@ def make_dataset_from_rlds2(
         dataset_statistics = get_dataset_statistics(
             full_dataset,
             hash_dependencies = f"{str(state_obs_keys)} {datetime.now().strftime('%Y-%m-%d')}",
-            save_dir=data_dir
+            save_dir=os.path.expanduser(os.path.join(data_dir, name))
         )
     dataset_statistics = tree_map(np.array, dataset_statistics)
     
@@ -701,9 +702,11 @@ def make_dataset_from_rlds2(
                 f"does not match proprio dimension ({dataset_statistics['proprio']['mean'].shape[-1]})."
             )
         dataset_statistics["proprio"]["mask"] = np.array(proprio_normalization_mask)
-        
     
-    train_num = int(len(full_dataset) * train_ratio)
+    length = 0
+    for _ in tqdm(full_dataset, desc='Counting dataset length'):
+        length += 1
+    train_num = int(length * train_ratio)
     if train:
         dataset = full_dataset.take(train_num)
     else:

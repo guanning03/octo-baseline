@@ -1,3 +1,5 @@
+import os
+os.environ['CURL_CA_BUNDLE'] = ''
 from ml_collections import ConfigDict
 from ml_collections.config_dict import FieldReference, placeholder
 import os
@@ -23,12 +25,11 @@ def get_config(config_string="full,language_conditioned"):
     ### 这个就是传给 make_single_dataset 的第一个参数
     FINETUNING_KWARGS = {
         "name": "cobot_magic",
-        "data_dir": "~/autodl-tmp/",
+        "data_dir": "/root/autodl-tmp/",
         "train_ratio": 0.85,
         "image_obs_keys": {"primary": "cam_high", 
                            "wrist_left": "cam_left_wrist", 
-                           "wrist_right": "cam_right_wrist"
-                           "proprio"},
+                           "wrist_right": "cam_right_wrist"},
         "state_obs_keys": ["qpos", "qvel"],
         "language_key": "instruction",
         "action_proprio_normalization_type": "normal",
@@ -66,18 +67,18 @@ def get_config(config_string="full,language_conditioned"):
         raise ValueError("Invalid mode")
 
     max_steps = FieldReference(50000)
-    window_size = FieldReference(default=3)
+    window_size = FieldReference(default=2)
 
     config = dict(
         pretrained_path='/root/autodl-tmp/octo-small',
         pretrained_step=270000,
-        batch_size=256,
-        shuffle_buffer_size=10000,
+        batch_size=16,
+        shuffle_buffer_size=5000,
         num_steps=max_steps,
         log_interval=100,
         eval_interval=5000,
         save_interval=5000,
-        save_dir=os.path.join(os.path.dirname(__file__), f'./../../runs/{CURRENT_TIME}'),
+        save_dir=os.path.join('/root/autodl-tmp/'),
         seed=42,
         wandb=dict(
             project="octo_cobot", group=placeholder(str), entity=placeholder(str)
@@ -126,7 +127,7 @@ def get_config(config_string="full,language_conditioned"):
 
     traj_transform_kwargs = dict(
         window_size=window_size,
-        future_action_window_size=3,
+        future_action_window_size=4,
         goal_relabeling_strategy=goal_relabeling_strategy,
         task_augment_strategy="delete_task_conditioning",
         task_augment_kwargs=dict(
@@ -163,9 +164,9 @@ def get_config(config_string="full,language_conditioned"):
     )
     frame_transform_kwargs = dict(
         resize_size={
-            "primary": (640, 480),  # workspace (3rd person) camera is at 256x256
-            "wrist_left": (640, 480),  # wrist camera is at 128x128
-            "wrist_right": (640, 480)
+            "primary": (320, 240),  # workspace (3rd person) camera is at 256x256
+            "wrist_left": (320, 240),  # wrist camera is at 128x128
+            "wrist_right": (320, 240)
         },
         image_augment_kwargs=[
             workspace_augment_kwargs,
