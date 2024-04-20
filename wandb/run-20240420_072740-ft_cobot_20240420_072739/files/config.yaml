@@ -1,0 +1,330 @@
+wandb_version: 1
+
+batch_size:
+  desc: null
+  value: 16
+dataset_kwargs:
+  desc: null
+  value:
+    absolute_action_mask:
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    action_normalization_mask:
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - false
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - false
+    action_proprio_normalization_type: normal
+    data_dir: /root/autodl-tmp/
+    image_obs_keys:
+      primary: cam_high
+      wrist_left: cam_left_wrist
+      wrist_right: cam_right_wrist
+    language_key: instruction
+    name: cobot_magic
+    proprio_normalization_mask:
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - false
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - false
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    - true
+    standardize_fn: octo/data/cobot/standardize.py:standardize_fn
+    state_obs_keys:
+    - qpos
+    - qvel
+    train_ratio: 0.85
+eval_interval:
+  desc: null
+  value: 5000
+finetuning_mode:
+  desc: null
+  value: full
+frame_transform_kwargs:
+  desc: null
+  value:
+    image_augment_kwargs:
+    - random_resized_crop:
+        scale:
+        - 0.8
+        - 1.0
+        ratio:
+        - 0.9
+        - 1.1
+      random_brightness:
+      - 0.1
+      random_contrast:
+      - 0.9
+      - 1.1
+      random_saturation:
+      - 0.9
+      - 1.1
+      random_hue:
+      - 0.05
+      augment_order:
+      - random_resized_crop
+      - random_brightness
+      - random_contrast
+      - random_saturation
+      - random_hue
+    - random_brightness:
+      - 0.1
+      random_contrast:
+      - 0.9
+      - 1.1
+      random_saturation:
+      - 0.9
+      - 1.1
+      random_hue:
+      - 0.05
+      augment_order:
+      - random_brightness
+      - random_contrast
+      - random_saturation
+      - random_hue
+    resize_size:
+      primary:
+      - 320
+      - 240
+      wrist_left:
+      - 320
+      - 240
+      wrist_right:
+      - 320
+      - 240
+frame_transform_threads:
+  desc: null
+  value: 16
+log_interval:
+  desc: null
+  value: 100
+modality:
+  desc: null
+  value: language_conditioned
+num_steps:
+  desc: null
+  value: 50000
+optimizer:
+  desc: null
+  value:
+    clip_gradient: 1.0
+    frozen_keys: null
+    grad_accumulation_steps: null
+    learning_rate:
+      decay_steps: 50000
+      end_value: 0.0
+      init_value: 0.0
+      name: cosine
+      peak_value: 0.0003
+      warmup_steps: 2000
+    weight_decay: 0.01
+pretrained_path:
+  desc: null
+  value: /root/autodl-tmp/octo-small
+pretrained_step:
+  desc: null
+  value: 270000
+save_dir:
+  desc: null
+  value: /root/autodl-tmp/octo_cobot/ft_cobot_20240420_072739
+save_interval:
+  desc: null
+  value: 5000
+seed:
+  desc: null
+  value: 42
+shuffle_buffer_size:
+  desc: null
+  value: 5000
+traj_transform_kwargs:
+  desc: null
+  value:
+    future_action_window_size: 4
+    goal_relabeling_strategy: null
+    task_augment_kwargs:
+      keep_image_prob: 0.0
+    task_augment_strategy: delete_task_conditioning
+    window_size: 2
+val_kwargs:
+  desc: null
+  value:
+    num_val_batches: 16
+    val_shuffle_buffer_size: 1000
+viz_kwargs:
+  desc: null
+  value:
+    eval_batch_size: 128
+    samples_per_state: 8
+    trajs_for_metrics: 100
+    trajs_for_viz: 8
+wandb:
+  desc: null
+  value:
+    entity: null
+    group: null
+    project: octo_cobot
+window_size:
+  desc: null
+  value: 2
+_wandb:
+  desc: null
+  value:
+    python_version: 3.10.8
+    cli_version: 0.16.6
+    framework: huggingface
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1713569260.0
+    t:
+      1:
+      - 2
+      - 3
+      - 12
+      - 45
+      - 55
+      2:
+      - 1
+      - 2
+      - 3
+      - 11
+      - 12
+      - 45
+      - 49
+      - 55
+      3:
+      - 13
+      - 14
+      - 16
+      - 23
+      - 61
+      4: 3.10.8
+      5: 0.16.6
+      8:
+      - 5
+      13: linux-x86_64
+example_batch_spec:
+  desc: null
+  value:
+    absolute_action_mask:
+    - - 16
+      - 14
+    - bool
+    action:
+    - - 16
+      - 6
+      - 14
+    - float32
+    observation:
+      image_primary:
+      - - 16
+        - 2
+        - 320
+        - 240
+        - 3
+      - uint8
+      image_wrist_left:
+      - - 16
+        - 2
+        - 320
+        - 240
+        - 3
+      - uint8
+      image_wrist_right:
+      - - 16
+        - 2
+        - 320
+        - 240
+        - 3
+      - uint8
+      pad_mask:
+      - - 16
+        - 2
+      - bool
+      pad_mask_dict:
+        image_primary:
+        - - 16
+          - 2
+        - bool
+        image_wrist_left:
+        - - 16
+          - 2
+        - bool
+        image_wrist_right:
+        - - 16
+          - 2
+        - bool
+        proprio:
+        - - 16
+          - 2
+        - bool
+        timestep:
+        - - 16
+          - 2
+        - bool
+      proprio:
+      - - 16
+        - 2
+        - 28
+      - float32
+      timestep:
+      - - 16
+        - 2
+      - int32
+    task:
+      language_instruction:
+        attention_mask:
+        - - 16
+          - 16
+        - int64
+        input_ids:
+        - - 16
+          - 16
+        - int64
+      pad_mask_dict:
+        language_instruction:
+        - - 16
+        - bool
