@@ -711,6 +711,8 @@ def make_dataset_from_rlds(
         dataset = full_dataset.take(train_num)
     else:
         dataset = full_dataset.skip(train_num)
+        
+    full_dataset.with_ram_budget(1)
     
     dataset = dataset.traj_map(
         partial(

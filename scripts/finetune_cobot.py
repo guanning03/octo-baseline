@@ -13,6 +13,8 @@ import optax
 import tensorflow as tf
 import tqdm
 import wandb
+from octo.data.utils.format import standardize_pytree
+
 from octo.model.components.tokenizers import LowdimObsTokenizer
 from octo.data.dataset import make_single_dataset
 from octo.model.octo_model import OctoModel
@@ -45,6 +47,8 @@ FLAGS = flags.FLAGS
 
 flags.DEFINE_string("name", "experiment", "Experiment name.")
 flags.DEFINE_bool("debug", False, "Debug config (no wandb logging)") ### 默认设成False，便于wandb显示
+
+flags.DEFINE_string("params_json_path", "./all_param.json", "Path to save all params' shape")
 
 default_config_file = os.path.join(
     os.path.dirname(__file__), "configs/finetune_config_cobot.py"
@@ -252,6 +256,9 @@ def main(_):
     if FLAGS.config.optimizer.frozen_keys is None:
         FLAGS.config.optimizer.frozen_keys = model.config["optimizer"]["frozen_keys"]
 
+    with open(FLAGS.params_json_path, 'w') as f:
+        f.write(standardize_pytree(params))
+    
     tx, lr_callable, param_norm_callable = create_optimizer(
         params,
         **FLAGS.config.optimizer.to_dict(),
@@ -381,13 +388,13 @@ def main(_):
         **FLAGS.config.val_kwargs,
     )
 
-    viz_callback = VisualizationCallback(
-        text_processor=text_processor,
-        val_dataset_kwargs_list=dataset_kwargs_list,
-        dataset_kwargs=FLAGS.config,
-        modes_to_evaluate=modes_to_evaluate,
-        **FLAGS.config.viz_kwargs,
-    )
+    # viz_callback = VisualizationCallback(
+    #     text_processor=text_processor,
+    #     val_dataset_kwargs_list=dataset_kwargs_list,
+    #     dataset_kwargs=FLAGS.config,
+    #     modes_to_evaluate=modes_to_evaluate,
+    #     **FLAGS.config.viz_kwargs,
+    # )
 
     #########
     #

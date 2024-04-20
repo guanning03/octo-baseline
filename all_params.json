@@ -1,0 +1,1132 @@
+{
+    "heads_action": {
+        "diffusion_model": {
+            "cond_encoder": {
+                "Dense_0": {
+                    "bias": "Shape: (64,)",
+                    "kernel": "Shape: (32, 64)"
+                },
+                "Dense_1": {
+                    "bias": "Shape: (32,)",
+                    "kernel": "Shape: (64, 32)"
+                }
+            },
+            "reverse_network": {
+                "Dense_0": {
+                    "bias": "Shape: (256,)",
+                    "kernel": "Shape: (472, 256)"
+                },
+                "Dense_1": {
+                    "bias": "Shape: (56,)",
+                    "kernel": "Shape: (256, 56)"
+                },
+                "MLPResNetBlock_0": {
+                    "Dense_0": {
+                        "bias": "Shape: (1024,)",
+                        "kernel": "Shape: (256, 1024)"
+                    },
+                    "Dense_1": {
+                        "bias": "Shape: (256,)",
+                        "kernel": "Shape: (1024, 256)"
+                    },
+                    "LayerNorm_0": {
+                        "bias": "Shape: (256,)",
+                        "scale": "Shape: (256,)"
+                    }
+                },
+                "MLPResNetBlock_1": {
+                    "Dense_0": {
+                        "bias": "Shape: (1024,)",
+                        "kernel": "Shape: (256, 1024)"
+                    },
+                    "Dense_1": {
+                        "bias": "Shape: (256,)",
+                        "kernel": "Shape: (1024, 256)"
+                    },
+                    "LayerNorm_0": {
+                        "bias": "Shape: (256,)",
+                        "scale": "Shape: (256,)"
+                    }
+                },
+                "MLPResNetBlock_2": {
+                    "Dense_0": {
+                        "bias": "Shape: (1024,)",
+                        "kernel": "Shape: (256, 1024)"
+                    },
+                    "Dense_1": {
+                        "bias": "Shape: (256,)",
+                        "kernel": "Shape: (1024, 256)"
+                    },
+                    "LayerNorm_0": {
+                        "bias": "Shape: (256,)",
+                        "scale": "Shape: (256,)"
+                    }
+                }
+            },
+            "time_preprocess": {
+                "kernel": "Shape: (16, 1)"
+            }
+        }
+    },
+    "octo_transformer": {
+        "BlockTransformer_0": {
+            "Transformer_0": {
+                "encoder_norm": {
+                    "bias": "Shape: (384,)",
+                    "scale": "Shape: (384,)"
+                },
+                "encoderblock_0": {
+                    "LayerNorm_0": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "LayerNorm_1": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "MlpBlock_0": {
+                        "Dense_0": {
+                            "bias": "Shape: (1536,)",
+                            "kernel": "Shape: (384, 1536)"
+                        },
+                        "Dense_1": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (1536, 384)"
+                        }
+                    },
+                    "MultiHeadDotProductAttention_0": {
+                        "key": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "out": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (6, 64, 384)"
+                        },
+                        "query": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "value": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        }
+                    }
+                },
+                "encoderblock_1": {
+                    "LayerNorm_0": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "LayerNorm_1": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "MlpBlock_0": {
+                        "Dense_0": {
+                            "bias": "Shape: (1536,)",
+                            "kernel": "Shape: (384, 1536)"
+                        },
+                        "Dense_1": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (1536, 384)"
+                        }
+                    },
+                    "MultiHeadDotProductAttention_0": {
+                        "key": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "out": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (6, 64, 384)"
+                        },
+                        "query": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "value": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        }
+                    }
+                },
+                "encoderblock_10": {
+                    "LayerNorm_0": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "LayerNorm_1": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "MlpBlock_0": {
+                        "Dense_0": {
+                            "bias": "Shape: (1536,)",
+                            "kernel": "Shape: (384, 1536)"
+                        },
+                        "Dense_1": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (1536, 384)"
+                        }
+                    },
+                    "MultiHeadDotProductAttention_0": {
+                        "key": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "out": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (6, 64, 384)"
+                        },
+                        "query": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "value": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        }
+                    }
+                },
+                "encoderblock_11": {
+                    "LayerNorm_0": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "LayerNorm_1": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "MlpBlock_0": {
+                        "Dense_0": {
+                            "bias": "Shape: (1536,)",
+                            "kernel": "Shape: (384, 1536)"
+                        },
+                        "Dense_1": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (1536, 384)"
+                        }
+                    },
+                    "MultiHeadDotProductAttention_0": {
+                        "key": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "out": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (6, 64, 384)"
+                        },
+                        "query": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "value": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        }
+                    }
+                },
+                "encoderblock_2": {
+                    "LayerNorm_0": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "LayerNorm_1": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "MlpBlock_0": {
+                        "Dense_0": {
+                            "bias": "Shape: (1536,)",
+                            "kernel": "Shape: (384, 1536)"
+                        },
+                        "Dense_1": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (1536, 384)"
+                        }
+                    },
+                    "MultiHeadDotProductAttention_0": {
+                        "key": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "out": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (6, 64, 384)"
+                        },
+                        "query": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "value": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        }
+                    }
+                },
+                "encoderblock_3": {
+                    "LayerNorm_0": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "LayerNorm_1": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "MlpBlock_0": {
+                        "Dense_0": {
+                            "bias": "Shape: (1536,)",
+                            "kernel": "Shape: (384, 1536)"
+                        },
+                        "Dense_1": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (1536, 384)"
+                        }
+                    },
+                    "MultiHeadDotProductAttention_0": {
+                        "key": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "out": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (6, 64, 384)"
+                        },
+                        "query": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "value": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        }
+                    }
+                },
+                "encoderblock_4": {
+                    "LayerNorm_0": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "LayerNorm_1": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "MlpBlock_0": {
+                        "Dense_0": {
+                            "bias": "Shape: (1536,)",
+                            "kernel": "Shape: (384, 1536)"
+                        },
+                        "Dense_1": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (1536, 384)"
+                        }
+                    },
+                    "MultiHeadDotProductAttention_0": {
+                        "key": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "out": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (6, 64, 384)"
+                        },
+                        "query": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "value": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        }
+                    }
+                },
+                "encoderblock_5": {
+                    "LayerNorm_0": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "LayerNorm_1": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "MlpBlock_0": {
+                        "Dense_0": {
+                            "bias": "Shape: (1536,)",
+                            "kernel": "Shape: (384, 1536)"
+                        },
+                        "Dense_1": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (1536, 384)"
+                        }
+                    },
+                    "MultiHeadDotProductAttention_0": {
+                        "key": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "out": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (6, 64, 384)"
+                        },
+                        "query": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "value": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        }
+                    }
+                },
+                "encoderblock_6": {
+                    "LayerNorm_0": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "LayerNorm_1": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "MlpBlock_0": {
+                        "Dense_0": {
+                            "bias": "Shape: (1536,)",
+                            "kernel": "Shape: (384, 1536)"
+                        },
+                        "Dense_1": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (1536, 384)"
+                        }
+                    },
+                    "MultiHeadDotProductAttention_0": {
+                        "key": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "out": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (6, 64, 384)"
+                        },
+                        "query": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "value": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        }
+                    }
+                },
+                "encoderblock_7": {
+                    "LayerNorm_0": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "LayerNorm_1": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "MlpBlock_0": {
+                        "Dense_0": {
+                            "bias": "Shape: (1536,)",
+                            "kernel": "Shape: (384, 1536)"
+                        },
+                        "Dense_1": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (1536, 384)"
+                        }
+                    },
+                    "MultiHeadDotProductAttention_0": {
+                        "key": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "out": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (6, 64, 384)"
+                        },
+                        "query": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "value": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        }
+                    }
+                },
+                "encoderblock_8": {
+                    "LayerNorm_0": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "LayerNorm_1": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "MlpBlock_0": {
+                        "Dense_0": {
+                            "bias": "Shape: (1536,)",
+                            "kernel": "Shape: (384, 1536)"
+                        },
+                        "Dense_1": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (1536, 384)"
+                        }
+                    },
+                    "MultiHeadDotProductAttention_0": {
+                        "key": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "out": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (6, 64, 384)"
+                        },
+                        "query": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "value": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        }
+                    }
+                },
+                "encoderblock_9": {
+                    "LayerNorm_0": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "LayerNorm_1": {
+                        "bias": "Shape: (384,)",
+                        "scale": "Shape: (384,)"
+                    },
+                    "MlpBlock_0": {
+                        "Dense_0": {
+                            "bias": "Shape: (1536,)",
+                            "kernel": "Shape: (384, 1536)"
+                        },
+                        "Dense_1": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (1536, 384)"
+                        }
+                    },
+                    "MultiHeadDotProductAttention_0": {
+                        "key": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "out": {
+                            "bias": "Shape: (384,)",
+                            "kernel": "Shape: (6, 64, 384)"
+                        },
+                        "query": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        },
+                        "value": {
+                            "bias": "Shape: (6, 64)",
+                            "kernel": "Shape: (384, 6, 64)"
+                        }
+                    }
+                }
+            }
+        },
+        "obs_primary_pos_embedding": "Shape: (1, 10, 300, 384)",
+        "obs_primary_projection": {
+            "bias": "Shape: (384,)",
+            "kernel": "Shape: (512, 384)"
+        },
+        "obs_proprio_pos_embedding": "Shape: (1, 10, 28, 384)",
+        "obs_proprio_projection": {
+            "bias": "Shape: (384,)",
+            "kernel": "Shape: (1, 384)"
+        },
+        "obs_wrist_left_pos_embedding": "Shape: (1, 10, 300, 384)",
+        "obs_wrist_left_projection": {
+            "bias": "Shape: (384,)",
+            "kernel": "Shape: (512, 384)"
+        },
+        "obs_wrist_right_pos_embedding": "Shape: (1, 10, 300, 384)",
+        "obs_wrist_right_projection": {
+            "bias": "Shape: (384,)",
+            "kernel": "Shape: (512, 384)"
+        },
+        "observation_tokenizers_primary": {
+            "SmallStem16_0": {
+                "GroupNorm_0": {
+                    "bias": "Shape: (32,)",
+                    "scale": "Shape: (32,)"
+                },
+                "GroupNorm_1": {
+                    "bias": "Shape: (96,)",
+                    "scale": "Shape: (96,)"
+                },
+                "GroupNorm_2": {
+                    "bias": "Shape: (192,)",
+                    "scale": "Shape: (192,)"
+                },
+                "GroupNorm_3": {
+                    "bias": "Shape: (384,)",
+                    "scale": "Shape: (384,)"
+                },
+                "StdConv_0": {
+                    "bias": "Shape: (32,)",
+                    "kernel": "Shape: (3, 3, 6, 32)"
+                },
+                "StdConv_1": {
+                    "bias": "Shape: (96,)",
+                    "kernel": "Shape: (3, 3, 32, 96)"
+                },
+                "StdConv_2": {
+                    "bias": "Shape: (192,)",
+                    "kernel": "Shape: (3, 3, 96, 192)"
+                },
+                "StdConv_3": {
+                    "bias": "Shape: (384,)",
+                    "kernel": "Shape: (3, 3, 192, 384)"
+                },
+                "embedding": {
+                    "bias": "Shape: (512,)",
+                    "kernel": "Shape: (1, 1, 384, 512)"
+                }
+            }
+        },
+        "observation_tokenizers_wrist_left": {
+            "SmallStem16_0": {
+                "GroupNorm_0": {
+                    "bias": "Shape: (32,)",
+                    "scale": "Shape: (32,)"
+                },
+                "GroupNorm_1": {
+                    "bias": "Shape: (96,)",
+                    "scale": "Shape: (96,)"
+                },
+                "GroupNorm_2": {
+                    "bias": "Shape: (192,)",
+                    "scale": "Shape: (192,)"
+                },
+                "GroupNorm_3": {
+                    "bias": "Shape: (384,)",
+                    "scale": "Shape: (384,)"
+                },
+                "StdConv_0": {
+                    "bias": "Shape: (32,)",
+                    "kernel": "Shape: (3, 3, 12, 32)"
+                },
+                "StdConv_1": {
+                    "bias": "Shape: (96,)",
+                    "kernel": "Shape: (3, 3, 32, 96)"
+                },
+                "StdConv_2": {
+                    "bias": "Shape: (192,)",
+                    "kernel": "Shape: (3, 3, 96, 192)"
+                },
+                "StdConv_3": {
+                    "bias": "Shape: (384,)",
+                    "kernel": "Shape: (3, 3, 192, 384)"
+                },
+                "embedding": {
+                    "bias": "Shape: (512,)",
+                    "kernel": "Shape: (1, 1, 384, 512)"
+                }
+            }
+        },
+        "observation_tokenizers_wrist_right": {
+            "SmallStem16_0": {
+                "GroupNorm_0": {
+                    "bias": "Shape: (32,)",
+                    "scale": "Shape: (32,)"
+                },
+                "GroupNorm_1": {
+                    "bias": "Shape: (96,)",
+                    "scale": "Shape: (96,)"
+                },
+                "GroupNorm_2": {
+                    "bias": "Shape: (192,)",
+                    "scale": "Shape: (192,)"
+                },
+                "GroupNorm_3": {
+                    "bias": "Shape: (384,)",
+                    "scale": "Shape: (384,)"
+                },
+                "StdConv_0": {
+                    "bias": "Shape: (32,)",
+                    "kernel": "Shape: (3, 3, 12, 32)"
+                },
+                "StdConv_1": {
+                    "bias": "Shape: (96,)",
+                    "kernel": "Shape: (3, 3, 32, 96)"
+                },
+                "StdConv_2": {
+                    "bias": "Shape: (192,)",
+                    "kernel": "Shape: (3, 3, 96, 192)"
+                },
+                "StdConv_3": {
+                    "bias": "Shape: (384,)",
+                    "kernel": "Shape: (3, 3, 192, 384)"
+                },
+                "embedding": {
+                    "bias": "Shape: (512,)",
+                    "kernel": "Shape: (1, 1, 384, 512)"
+                }
+            }
+        },
+        "readout_action_pos_embedding": "Shape: (1, 10, 1, 384)",
+        "task_language_pos_embedding": "Shape: (1, 16, 384)",
+        "task_language_projection": {
+            "bias": "Shape: (384,)",
+            "kernel": "Shape: (768, 384)"
+        },
+        "task_tokenizers_language": {
+            "hf_model": {
+                "encoder": {
+                    "block": {
+                        "0": {
+                            "layer": {
+                                "0": {
+                                    "SelfAttention": {
+                                        "k": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "o": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "q": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "relative_attention_bias": {
+                                            "embedding": "Shape: (32, 12)"
+                                        },
+                                        "v": {
+                                            "kernel": "Shape: (768, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                },
+                                "1": {
+                                    "DenseReluDense": {
+                                        "wi": {
+                                            "kernel": "Shape: (768, 3072)"
+                                        },
+                                        "wo": {
+                                            "kernel": "Shape: (3072, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                }
+                            }
+                        },
+                        "1": {
+                            "layer": {
+                                "0": {
+                                    "SelfAttention": {
+                                        "k": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "o": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "q": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "v": {
+                                            "kernel": "Shape: (768, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                },
+                                "1": {
+                                    "DenseReluDense": {
+                                        "wi": {
+                                            "kernel": "Shape: (768, 3072)"
+                                        },
+                                        "wo": {
+                                            "kernel": "Shape: (3072, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                }
+                            }
+                        },
+                        "10": {
+                            "layer": {
+                                "0": {
+                                    "SelfAttention": {
+                                        "k": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "o": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "q": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "v": {
+                                            "kernel": "Shape: (768, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                },
+                                "1": {
+                                    "DenseReluDense": {
+                                        "wi": {
+                                            "kernel": "Shape: (768, 3072)"
+                                        },
+                                        "wo": {
+                                            "kernel": "Shape: (3072, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                }
+                            }
+                        },
+                        "11": {
+                            "layer": {
+                                "0": {
+                                    "SelfAttention": {
+                                        "k": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "o": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "q": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "v": {
+                                            "kernel": "Shape: (768, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                },
+                                "1": {
+                                    "DenseReluDense": {
+                                        "wi": {
+                                            "kernel": "Shape: (768, 3072)"
+                                        },
+                                        "wo": {
+                                            "kernel": "Shape: (3072, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                }
+                            }
+                        },
+                        "2": {
+                            "layer": {
+                                "0": {
+                                    "SelfAttention": {
+                                        "k": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "o": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "q": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "v": {
+                                            "kernel": "Shape: (768, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                },
+                                "1": {
+                                    "DenseReluDense": {
+                                        "wi": {
+                                            "kernel": "Shape: (768, 3072)"
+                                        },
+                                        "wo": {
+                                            "kernel": "Shape: (3072, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                }
+                            }
+                        },
+                        "3": {
+                            "layer": {
+                                "0": {
+                                    "SelfAttention": {
+                                        "k": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "o": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "q": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "v": {
+                                            "kernel": "Shape: (768, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                },
+                                "1": {
+                                    "DenseReluDense": {
+                                        "wi": {
+                                            "kernel": "Shape: (768, 3072)"
+                                        },
+                                        "wo": {
+                                            "kernel": "Shape: (3072, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                }
+                            }
+                        },
+                        "4": {
+                            "layer": {
+                                "0": {
+                                    "SelfAttention": {
+                                        "k": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "o": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "q": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "v": {
+                                            "kernel": "Shape: (768, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                },
+                                "1": {
+                                    "DenseReluDense": {
+                                        "wi": {
+                                            "kernel": "Shape: (768, 3072)"
+                                        },
+                                        "wo": {
+                                            "kernel": "Shape: (3072, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                }
+                            }
+                        },
+                        "5": {
+                            "layer": {
+                                "0": {
+                                    "SelfAttention": {
+                                        "k": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "o": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "q": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "v": {
+                                            "kernel": "Shape: (768, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                },
+                                "1": {
+                                    "DenseReluDense": {
+                                        "wi": {
+                                            "kernel": "Shape: (768, 3072)"
+                                        },
+                                        "wo": {
+                                            "kernel": "Shape: (3072, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                }
+                            }
+                        },
+                        "6": {
+                            "layer": {
+                                "0": {
+                                    "SelfAttention": {
+                                        "k": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "o": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "q": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "v": {
+                                            "kernel": "Shape: (768, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                },
+                                "1": {
+                                    "DenseReluDense": {
+                                        "wi": {
+                                            "kernel": "Shape: (768, 3072)"
+                                        },
+                                        "wo": {
+                                            "kernel": "Shape: (3072, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                }
+                            }
+                        },
+                        "7": {
+                            "layer": {
+                                "0": {
+                                    "SelfAttention": {
+                                        "k": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "o": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "q": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "v": {
+                                            "kernel": "Shape: (768, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                },
+                                "1": {
+                                    "DenseReluDense": {
+                                        "wi": {
+                                            "kernel": "Shape: (768, 3072)"
+                                        },
+                                        "wo": {
+                                            "kernel": "Shape: (3072, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                }
+                            }
+                        },
+                        "8": {
+                            "layer": {
+                                "0": {
+                                    "SelfAttention": {
+                                        "k": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "o": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "q": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "v": {
+                                            "kernel": "Shape: (768, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                },
+                                "1": {
+                                    "DenseReluDense": {
+                                        "wi": {
+                                            "kernel": "Shape: (768, 3072)"
+                                        },
+                                        "wo": {
+                                            "kernel": "Shape: (3072, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                }
+                            }
+                        },
+                        "9": {
+                            "layer": {
+                                "0": {
+                                    "SelfAttention": {
+                                        "k": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "o": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "q": {
+                                            "kernel": "Shape: (768, 768)"
+                                        },
+                                        "v": {
+                                            "kernel": "Shape: (768, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                },
+                                "1": {
+                                    "DenseReluDense": {
+                                        "wi": {
+                                            "kernel": "Shape: (768, 3072)"
+                                        },
+                                        "wo": {
+                                            "kernel": "Shape: (3072, 768)"
+                                        }
+                                    },
+                                    "layer_norm": {
+                                        "weight": "Shape: (768,)"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "final_layer_norm": {
+                        "weight": "Shape: (768,)"
+                    }
+                },
+                "shared": {
+                    "embedding": "Shape: (32128, 768)"
+                }
+            }
+        }
+    }
+}
