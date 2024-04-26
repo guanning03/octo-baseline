@@ -7,6 +7,7 @@ from typing import Mapping, Tuple, Union
 from absl import logging
 import dlimp as dl
 import tensorflow as tf
+from octo.data.utils.format import channel_transform
 
 
 def augment(
@@ -74,6 +75,7 @@ def decode_and_resize(
                 f"Unsupported image dtype: found image_{name} with dtype {image.dtype}"
             )
         if name in resize_size:
+            image = channel_transform(image)
             image = dl.transforms.resize_image(image, size=resize_size[name])
         obs[f"image_{name}"] = image
 

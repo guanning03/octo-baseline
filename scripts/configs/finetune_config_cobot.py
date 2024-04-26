@@ -24,13 +24,13 @@ def get_config(config_string="full,language_conditioned"):
 
     ### 这个就是传给 make_single_dataset 的第一个参数
     FINETUNING_KWARGS = {
-        "name": "cobot_magic",
-        "data_dir": "/root/autodl-tmp/",
+        "name": "cobot_magic_data_full",
+        "data_dir": "/data/zengguanning/dataset",
         "train_ratio": 0.85,
         "image_obs_keys": {"primary": "cam_high", 
                            "wrist_left": "cam_left_wrist", 
                            "wrist_right": "cam_right_wrist"},
-        "state_obs_keys": ["qpos", "qvel"],
+        "state_obs_keys": ["qpos"],
         "language_key": "instruction",
         "action_proprio_normalization_type": "normal",
         # All actions are relative deltas, except for the last one (gripper) which is absolute
@@ -43,11 +43,9 @@ def get_config(config_string="full,language_conditioned"):
         # If the default data loading speed is too slow, try these:
         # "num_parallel_reads": 8,  # for reading from disk / GCS
         # "num_parallel_calls": 16,  # for initial dataset construction
-        "action_normalization_mask":[True, True, True, True, True, True, False,
-                                     True, True, True, True, True, True, False],
-        "proprio_normalization_mask":[True, True, True, True, True, True, False,
-                                      True, True, True, True, True, True, False,
-                                      True, True, True, True, True, True, True,
+        "action_normalization_mask":[True, True, True, True, True, True, True,
+                                     True, True, True, True, True, True, True],
+        "proprio_normalization_mask":[True, True, True, True, True, True, True,
                                       True, True, True, True, True, True, True]
     }
 
@@ -70,7 +68,7 @@ def get_config(config_string="full,language_conditioned"):
     window_size = FieldReference(default=2)
 
     config = dict(
-        pretrained_path='/root/autodl-tmp/octo-small',
+        pretrained_path='/data/zengguanning/checkpoint/octo-base',
         pretrained_step=270000,
         batch_size=16,
         shuffle_buffer_size=5000,
@@ -78,7 +76,7 @@ def get_config(config_string="full,language_conditioned"):
         log_interval=100,
         eval_interval=5000,
         save_interval=5000,
-        save_dir=os.path.join('/root/autodl-tmp/'),
+        save_dir=os.path.join('/data/zengguanning/checkpoint/ft-result/0220-20240427'),
         seed=42,
         wandb=dict(
             project="octo_cobot", group=placeholder(str), entity=placeholder(str)
@@ -164,9 +162,9 @@ def get_config(config_string="full,language_conditioned"):
     )
     frame_transform_kwargs = dict(
         resize_size={
-            "primary": (320, 240),  # workspace (3rd person) camera is at 256x256
-            "wrist_left": (320, 240),  # wrist camera is at 128x128
-            "wrist_right": (320, 240)
+            "primary": (240, 320),  # workspace (3rd person) camera is at 256x256
+            "wrist_left": (240, 320),  # wrist camera is at 128x128
+            "wrist_right": (240, 320)
         },
         image_augment_kwargs=[
             workspace_augment_kwargs,

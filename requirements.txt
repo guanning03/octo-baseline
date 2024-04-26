@@ -27,4 +27,4 @@ plotly >= 5.16.1
 matplotlib
 ipykernel
 scipy == 1.11.0
-opencv_python == 4.9.0
+opencv_python
