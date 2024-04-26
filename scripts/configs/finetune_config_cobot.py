@@ -1,5 +1,6 @@
 import os
 os.environ['CURL_CA_BUNDLE'] = ''
+os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
 from ml_collections import ConfigDict
 from ml_collections.config_dict import FieldReference, placeholder
 import os
@@ -46,7 +47,8 @@ def get_config(config_string="full,language_conditioned"):
         "action_normalization_mask":[True, True, True, True, True, True, True,
                                      True, True, True, True, True, True, True],
         "proprio_normalization_mask":[True, True, True, True, True, True, True,
-                                      True, True, True, True, True, True, True]
+                                      True, True, True, True, True, True, True],
+        "dataset_statistics": '/data/zengguanning/dataset/cobot_magic_data_full/dataset_statistics.json',
     }
 
     if mode == "full":
@@ -64,13 +66,13 @@ def get_config(config_string="full,language_conditioned"):
     else:
         raise ValueError("Invalid mode")
 
-    max_steps = FieldReference(50000)
+    max_steps = FieldReference(500000)
     window_size = FieldReference(default=2)
 
     config = dict(
         pretrained_path='/data/zengguanning/checkpoint/octo-base',
-        pretrained_step=270000,
-        batch_size=16,
+        pretrained_step=300000,
+        batch_size=32,
         shuffle_buffer_size=5000,
         num_steps=max_steps,
         log_interval=100,
@@ -101,7 +103,7 @@ def get_config(config_string="full,language_conditioned"):
         ),
         val_kwargs=dict(
             val_shuffle_buffer_size=1000,
-            num_val_batches=16,
+            num_val_batches=32,
         ),
         viz_kwargs=dict(
             eval_batch_size=128,

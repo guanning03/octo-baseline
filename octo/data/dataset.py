@@ -339,7 +339,7 @@ def make_dataset_from_rlds(
                 new_obs[f"depth_{new}"] = old_obs[old]
         
         ### state_obs_keys是一个列表
-        ### cobot的state_obs_keys应该是['qpos', 'qvel']
+        ### cobot的state_obs_keys应该是['qpos']
         # print('state_obs_keys', state_obs_keys)
         if state_obs_keys:
             new_obs["proprio"] = tf.concat(
@@ -667,7 +667,7 @@ def make_dataset_from_rlds(
     
     full_dataset = _wrap(load_dataset_from_hdf5, False)(os.path.expanduser(os.path.join(data_dir, name)))
     if shuffle:
-        full_dataset = full_dataset.shuffle(buffer_size=100000, seed=114514)
+        full_dataset = full_dataset.shuffle(buffer_size=100000, seed=142857)
     full_dataset = full_dataset.traj_map(restructure, num_parallel_calls)
 
     if isinstance(dataset_statistics, str):

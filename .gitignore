@@ -172,3 +172,4 @@ weights/
 # *.ipynb
 
 runs/
+wandb/
