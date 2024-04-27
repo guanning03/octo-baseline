@@ -26,7 +26,7 @@ def get_config(config_string="full,language_conditioned"):
     ### 这个就是传给 make_single_dataset 的第一个参数
     FINETUNING_KWARGS = {
         "name": "cobot_magic_data_full",
-        "data_dir": "/data/zengguanning/dataset",
+        "data_dir": "/root/autodl-tmp/",
         "train_ratio": 0.85,
         "image_obs_keys": {"primary": "cam_high", 
                            "wrist_left": "cam_left_wrist", 
@@ -48,7 +48,7 @@ def get_config(config_string="full,language_conditioned"):
                                      True, True, True, True, True, True, True],
         "proprio_normalization_mask":[True, True, True, True, True, True, True,
                                       True, True, True, True, True, True, True],
-        "dataset_statistics": '/data/zengguanning/dataset/cobot_magic_data_full/dataset_statistics.json',
+        "dataset_statistics": '/root/autodl-tmp/cobot_magic_data_full/dataset_statistics.json',
     }
 
     if mode == "full":
@@ -66,19 +66,19 @@ def get_config(config_string="full,language_conditioned"):
     else:
         raise ValueError("Invalid mode")
 
-    max_steps = FieldReference(500000)
+    max_steps = FieldReference(100000)
     window_size = FieldReference(default=2)
 
     config = dict(
-        pretrained_path='/data/zengguanning/checkpoint/octo-base',
+        pretrained_path='/root/autodl-tmp/octo-base',
         pretrained_step=300000,
-        batch_size=32,
+        batch_size=16,
         shuffle_buffer_size=5000,
         num_steps=max_steps,
         log_interval=100,
         eval_interval=5000,
         save_interval=5000,
-        save_dir=os.path.join('/data/zengguanning/checkpoint/ft-result/0220-20240427'),
+        save_dir=os.path.join('/root/autodl-tmp/runs-20240427'),
         seed=42,
         wandb=dict(
             project="octo_cobot", group=placeholder(str), entity=placeholder(str)
@@ -103,14 +103,14 @@ def get_config(config_string="full,language_conditioned"):
         ),
         val_kwargs=dict(
             val_shuffle_buffer_size=1000,
-            num_val_batches=32,
+            num_val_batches=16,
         ),
-        viz_kwargs=dict(
-            eval_batch_size=128,
-            trajs_for_metrics=100,
-            trajs_for_viz=8,
-            samples_per_state=8,
-        ),
+        # viz_kwargs=dict(
+        #     eval_batch_size=128,
+        #     trajs_for_metrics=100,
+        #     trajs_for_viz=8,
+        #     samples_per_state=8,
+        # ),
     )
 
     if task == "image_conditioned":
@@ -165,8 +165,8 @@ def get_config(config_string="full,language_conditioned"):
     frame_transform_kwargs = dict(
         resize_size={
             "primary": (240, 320),  # workspace (3rd person) camera is at 256x256
-            "wrist_left": (240, 320),  # wrist camera is at 128x128
-            "wrist_right": (240, 320)
+            "wrist_left": (120, 160),  # wrist camera is at 128x128
+            "wrist_right": (120, 160)
         },
         image_augment_kwargs=[
             workspace_augment_kwargs,

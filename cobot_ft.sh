@@ -1,5 +1,5 @@
 python ./scripts/finetune_cobot.py \
-    --name 0220-20240427\
-    --params_json_path /data/zengguanning/checkpoint/ft-result/0220-20240427/all-params.json \
-    > /data/zengguanning/checkpoint/ft-result/0220-20240427/stdout.ans \
-    2> /data/zengguanning/checkpoint/ft-result/0220-20240427/errout.err
+    --name cobot_standard \
+    --params_json_path /root/autodl-tmp/octo_ft_on_cobot_magic_data_standard/all-params.json \
+    > /root/autodl-tmp/octo_ft_on_cobot_magic_data_standard/stdout.ans \
+    2> /root/autodl-tmp/octo_ft_on_cobot_magic_data_standard/errout.err

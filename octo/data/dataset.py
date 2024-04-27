@@ -666,8 +666,7 @@ def make_dataset_from_rlds(
         return traj
     
     full_dataset = _wrap(load_dataset_from_hdf5, False)(os.path.expanduser(os.path.join(data_dir, name)))
-    if shuffle:
-        full_dataset = full_dataset.shuffle(buffer_size=100000, seed=142857)
+    full_dataset = full_dataset.shuffle(buffer_size=100000, seed=1953)
     full_dataset = full_dataset.traj_map(restructure, num_parallel_calls)
 
     if isinstance(dataset_statistics, str):
