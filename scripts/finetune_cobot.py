@@ -223,7 +223,7 @@ def main(_):
         DiffusionActionHead,
         readout_key="readout_action",
         use_map = False,
-        pred_horizon = 4,
+        pred_horizon = FLAGS.config.traj_transform_kwargs["future_action_window_size"],
         action_dim = 14
     )
     

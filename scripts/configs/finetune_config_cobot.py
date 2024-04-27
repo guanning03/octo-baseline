@@ -1,6 +1,6 @@
 import os
 os.environ['CURL_CA_BUNDLE'] = ''
-os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0, 2, 3, 4, 5, 6'
 from ml_collections import ConfigDict
 from ml_collections.config_dict import FieldReference, placeholder
 import os
@@ -26,7 +26,7 @@ def get_config(config_string="full,language_conditioned"):
     ### 这个就是传给 make_single_dataset 的第一个参数
     FINETUNING_KWARGS = {
         "name": "cobot_magic_data_full",
-        "data_dir": "/root/autodl-tmp/",
+        "data_dir": "/mnt/sdf/guanningz/octo-project/",
         "train_ratio": 0.85,
         "image_obs_keys": {"primary": "cam_high", 
                            "wrist_left": "cam_left_wrist", 
@@ -48,7 +48,7 @@ def get_config(config_string="full,language_conditioned"):
                                      True, True, True, True, True, True, True],
         "proprio_normalization_mask":[True, True, True, True, True, True, True,
                                       True, True, True, True, True, True, True],
-        "dataset_statistics": '/root/autodl-tmp/cobot_magic_data_full/dataset_statistics.json',
+        # "dataset_statistics": '/mnt/sdf/guanningz/octo-project/cobot_magic_data_full/dataset_statistics.json',
     }
 
     if mode == "full":
@@ -66,19 +66,19 @@ def get_config(config_string="full,language_conditioned"):
     else:
         raise ValueError("Invalid mode")
 
-    max_steps = FieldReference(100000)
+    max_steps = FieldReference(500000)
     window_size = FieldReference(default=2)
 
     config = dict(
-        pretrained_path='/root/autodl-tmp/octo-base',
+        pretrained_path='/mnt/sdf/guanningz/octo-project/octo-base',
         pretrained_step=300000,
-        batch_size=16,
+        batch_size=12,
         shuffle_buffer_size=5000,
         num_steps=max_steps,
         log_interval=100,
         eval_interval=5000,
         save_interval=5000,
-        save_dir=os.path.join('/root/autodl-tmp/runs-20240427'),
+        save_dir=os.path.join('/mnt/sdf/guanningz/octo-project/ckpt/octo_ft_on_cobot_magic_data_long'),
         seed=42,
         wandb=dict(
             project="octo_cobot", group=placeholder(str), entity=placeholder(str)
@@ -103,7 +103,7 @@ def get_config(config_string="full,language_conditioned"):
         ),
         val_kwargs=dict(
             val_shuffle_buffer_size=1000,
-            num_val_batches=16,
+            num_val_batches=10000000,
         ),
         # viz_kwargs=dict(
         #     eval_batch_size=128,

@@ -1,5 +1,5 @@
 python ./scripts/finetune_cobot.py \
-    --name cobot_standard \
-    --params_json_path /root/autodl-tmp/octo_ft_on_cobot_magic_data_standard/all-params.json \
-    > /root/autodl-tmp/octo_ft_on_cobot_magic_data_standard/stdout.ans \
-    2> /root/autodl-tmp/octo_ft_on_cobot_magic_data_standard/errout.err
+    --name cobot_long \
+    --params_json_path /mnt/sdf/guanningz/octo-project/ckpt/octo_ft_on_cobot_magic_data_long/all-params.json \
+    > /mnt/sdf/guanningz/octo-project/ckpt/octo_ft_on_cobot_magic_data_long/stdout.ans \
+    2> /mnt/sdf/guanningz/octo-project/ckpt/octo_ft_on_cobot_magic_data_long/errout.err

@@ -702,25 +702,25 @@ def make_dataset_from_rlds(
             )
         dataset_statistics["proprio"]["mask"] = np.array(proprio_normalization_mask)
     
-    train_ratio = 0.8
     train_remainder = int(20 * train_ratio)
 
-    def is_train(x, index):
+    def is_train(index, item):
         return index % 20 < train_remainder
 
-    def is_val(x, index):
+    def is_val(index, item):
         return index % 20 >= train_remainder
+
+    def get_item(index, item):
+        return item
 
     full_dataset = full_dataset.enumerate()
 
-    train_dataset = full_dataset.filter(lambda x, index: is_train(x, index)).map(lambda x, index: x)
-    val_dataset = full_dataset.filter(lambda x, index: is_val(x, index)).map(lambda x, index: x)
-    
+    train_dataset = full_dataset.filter(is_train).map(get_item)
+    val_dataset = full_dataset.filter(is_val).map(get_item)
     if train:
         dataset = train_dataset
     else:
         dataset = val_dataset
-            
     dataset = dataset.traj_map(
         partial(
             normalize_action_and_proprio,
