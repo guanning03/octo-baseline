@@ -666,7 +666,7 @@ def make_dataset_from_rlds(
         return traj
     
     full_dataset = _wrap(load_dataset_from_hdf5, False)(os.path.expanduser(os.path.join(data_dir, name)))
-    full_dataset = full_dataset.shuffle(buffer_size=100000, seed=1953)
+    # full_dataset = full_dataset.shuffle(buffer_size=100000, seed=1953)
     full_dataset = full_dataset.traj_map(restructure, num_parallel_calls)
 
     if isinstance(dataset_statistics, str):
@@ -702,17 +702,25 @@ def make_dataset_from_rlds(
             )
         dataset_statistics["proprio"]["mask"] = np.array(proprio_normalization_mask)
     
-    length = 0
-    for _ in tqdm(full_dataset, desc='Counting dataset length'):
-        length += 1
-    train_num = int(length * train_ratio)
-    if train:
-        dataset = full_dataset.take(train_num)
-    else:
-        dataset = full_dataset.skip(train_num)
-        
-    full_dataset.with_ram_budget(1)
+    train_ratio = 0.8
+    train_remainder = int(20 * train_ratio)
+
+    def is_train(x, index):
+        return index % 20 < train_remainder
+
+    def is_val(x, index):
+        return index % 20 >= train_remainder
+
+    full_dataset = full_dataset.enumerate()
+
+    train_dataset = full_dataset.filter(lambda x, index: is_train(x, index)).map(lambda x, index: x)
+    val_dataset = full_dataset.filter(lambda x, index: is_val(x, index)).map(lambda x, index: x)
     
+    if train:
+        dataset = train_dataset
+    else:
+        dataset = val_dataset
+            
     dataset = dataset.traj_map(
         partial(
             normalize_action_and_proprio,
