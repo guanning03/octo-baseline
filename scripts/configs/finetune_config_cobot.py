@@ -1,12 +1,21 @@
 import os
 os.environ['CURL_CA_BUNDLE'] = ''
-os.environ['CUDA_VISIBLE_DEVICES'] = '0, 2, 3, 4, 5, 6'
+os.environ['CUDA_VISIBLE_DEVICES'] = '2, 4, 6'
 from ml_collections import ConfigDict
 from ml_collections.config_dict import FieldReference, placeholder
 import os
 from datetime import datetime
 
 CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
+DATA_DIR = ''
+DATASET_STATISTICS = ''
+PRETRAINED_PATH = ''
+SAVE_DIR = ''
+BATCH_SIZE = 12
+MAX_STEPS = 500000
+WINDOW_SIZE = 2
+FUTURE_SIZE = 4
 
 def get_config(config_string="full,language_conditioned"):
     mode, task = config_string.split(",")
@@ -26,7 +35,7 @@ def get_config(config_string="full,language_conditioned"):
     ### 这个就是传给 make_single_dataset 的第一个参数
     FINETUNING_KWARGS = {
         "name": "cobot_magic_data_full",
-        "data_dir": "/mnt/sdf/guanningz/octo-project/",
+        "data_dir": DATA_DIR,
         "train_ratio": 0.85,
         "image_obs_keys": {"primary": "cam_high", 
                            "wrist_left": "cam_left_wrist", 
@@ -48,7 +57,7 @@ def get_config(config_string="full,language_conditioned"):
                                      True, True, True, True, True, True, True],
         "proprio_normalization_mask":[True, True, True, True, True, True, True,
                                       True, True, True, True, True, True, True],
-        # "dataset_statistics": '/mnt/sdf/guanningz/octo-project/cobot_magic_data_full/dataset_statistics.json',
+        # "dataset_statistics": DATASET_STATISTICS,
     }
 
     if mode == "full":
@@ -66,19 +75,19 @@ def get_config(config_string="full,language_conditioned"):
     else:
         raise ValueError("Invalid mode")
 
-    max_steps = FieldReference(500000)
+    max_steps = FieldReference(MAX_STEPS)
     window_size = FieldReference(default=2)
 
     config = dict(
-        pretrained_path='/mnt/sdf/guanningz/octo-project/octo-base',
+        pretrained_path=PRETRAINED_PATH,
         pretrained_step=300000,
-        batch_size=12,
+        batch_size=BATCH_SIZE,
         shuffle_buffer_size=5000,
         num_steps=max_steps,
         log_interval=100,
         eval_interval=5000,
         save_interval=5000,
-        save_dir=os.path.join('/mnt/sdf/guanningz/octo-project/ckpt/octo_ft_on_cobot_magic_data_long'),
+        save_dir=SAVE_DIR,
         seed=42,
         wandb=dict(
             project="octo_cobot", group=placeholder(str), entity=placeholder(str)
@@ -86,7 +95,7 @@ def get_config(config_string="full,language_conditioned"):
         dataset_kwargs=FINETUNING_KWARGS,
         modality=task,
         finetuning_mode=mode,
-        window_size=window_size,
+        window_size=WINDOW_SIZE,
         optimizer=dict(
             learning_rate=dict(
                 name="cosine",
@@ -127,7 +136,7 @@ def get_config(config_string="full,language_conditioned"):
 
     traj_transform_kwargs = dict(
         window_size=window_size,
-        future_action_window_size=4,
+        future_action_window_size=FUTURE_SIZE,
         goal_relabeling_strategy=goal_relabeling_strategy,
         task_augment_strategy="delete_task_conditioning",
         task_augment_kwargs=dict(
