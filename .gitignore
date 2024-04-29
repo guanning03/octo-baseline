@@ -173,3 +173,5 @@ weights/
 
 runs/
 wandb/
+logs/
+t5-base/

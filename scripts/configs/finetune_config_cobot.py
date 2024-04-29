@@ -8,10 +8,11 @@ from datetime import datetime
 
 CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
-DATA_DIR = ''
-DATASET_STATISTICS = ''
-PRETRAINED_PATH = ''
-SAVE_DIR = ''
+DATA_DIR = '/data1/zhuxiaopei/'
+DATA_NAME = 'cobot_magic_data_full'
+DATASET_STATISTICS = None
+PRETRAINED_PATH = '/data1/zhuxiaopei/octo-base'
+SAVE_DIR = '/home/zhuxiaopei/ckpt'
 BATCH_SIZE = 12
 MAX_STEPS = 500000
 WINDOW_SIZE = 2
@@ -34,7 +35,7 @@ def get_config(config_string="full,language_conditioned"):
 
     ### 这个就是传给 make_single_dataset 的第一个参数
     FINETUNING_KWARGS = {
-        "name": "cobot_magic_data_full",
+        "name": DATA_NAME,
         "data_dir": DATA_DIR,
         "train_ratio": 0.85,
         "image_obs_keys": {"primary": "cam_high", 
@@ -82,7 +83,7 @@ def get_config(config_string="full,language_conditioned"):
         pretrained_path=PRETRAINED_PATH,
         pretrained_step=300000,
         batch_size=BATCH_SIZE,
-        shuffle_buffer_size=5000,
+        shuffle_buffer_size=20000,
         num_steps=max_steps,
         log_interval=100,
         eval_interval=5000,
@@ -111,8 +112,8 @@ def get_config(config_string="full,language_conditioned"):
             grad_accumulation_steps=None,  # if you are using grad accumulation, you need to adjust max_steps accordingly
         ),
         val_kwargs=dict(
-            val_shuffle_buffer_size=1000,
-            num_val_batches=10000000,
+            val_shuffle_buffer_size=20000,
+            num_val_batches=256,
         ),
         # viz_kwargs=dict(
         #     eval_batch_size=128,

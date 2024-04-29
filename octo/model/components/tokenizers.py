@@ -184,7 +184,9 @@ class LanguageTokenizer(nn.Module):
     def setup(self):
         if self.encoder is not None:
             from transformers import AutoConfig, FlaxAutoModel, FlaxT5EncoderModel
-
+            
+            import os
+            os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
             config = AutoConfig.from_pretrained(self.encoder)
             if "t5" in self.encoder:
                 self.hf_model = FlaxT5EncoderModel(config).module
