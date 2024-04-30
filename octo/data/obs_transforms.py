@@ -7,7 +7,7 @@ from typing import Mapping, Tuple, Union
 from absl import logging
 import dlimp as dl
 import tensorflow as tf
-
+from .cobot.standardize import resize_image_with_padding
 
 def augment(
     obs: dict, seed: tf.Tensor, augment_kwargs: Union[dict, Mapping[str, dict]]
@@ -75,7 +75,8 @@ def decode_and_resize(
             )
         if name in resize_size:
             # image = tf.Tensor(channel_transform(image.numpy()))
-            image = dl.transforms.resize_image(image, size=resize_size[name])
+            # image = dl.transforms.resize_image(image, size=resize_size[name])
+            image = resize_image_with_padding(image, resize_size[name])
         obs[f"image_{name}"] = image
 
     for name in depth_names:

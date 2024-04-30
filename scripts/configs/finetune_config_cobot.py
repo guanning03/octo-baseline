@@ -175,9 +175,9 @@ def get_config(config_string=f"{MODE},language_conditioned"):
     )
     frame_transform_kwargs = dict(
         resize_size={
-            "primary": (240, 320),  # workspace (3rd person) camera is at 256x256
-            "wrist_left": (120, 160),  # wrist camera is at 128x128
-            "wrist_right": (120, 160)
+            "primary": (256, 256),  # workspace (3rd person) camera is at 256x256
+            "wrist_left": (128, 128),  # wrist camera is at 128x128
+            "wrist_right": (128, 128)
         },
         image_augment_kwargs=[
             workspace_augment_kwargs,
