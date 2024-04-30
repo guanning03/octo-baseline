@@ -1,6 +1,6 @@
 import os
 os.environ['CURL_CA_BUNDLE'] = ''
-os.environ['CUDA_VISIBLE_DEVICES'] = '2, 4, 6'
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 from ml_collections import ConfigDict
 from ml_collections.config_dict import FieldReference, placeholder
 import os
@@ -13,12 +13,13 @@ DATA_NAME = 'cobot_magic_data_full'
 DATASET_STATISTICS = None
 PRETRAINED_PATH = '/data1/zhuxiaopei/octo-base'
 SAVE_DIR = '/home/zhuxiaopei/ckpt'
-BATCH_SIZE = 12
-MAX_STEPS = 500000
+BATCH_SIZE = 4
+MAX_STEPS = 30000
 WINDOW_SIZE = 2
 FUTURE_SIZE = 4
+MODE='full'
 
-def get_config(config_string="full,language_conditioned"):
+def get_config(config_string=f"{MODE},language_conditioned"):
     mode, task = config_string.split(",")
     
     ### task中是否包含文字/图片指令

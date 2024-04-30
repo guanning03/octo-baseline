@@ -62,6 +62,7 @@ config_flags.DEFINE_config_file(
 
 
 def main(_):
+    logging.set_verbosity(logging.DEBUG) ### 可以调整日志输出的级别
     initialize_compilation_cache()
     devices = jax.devices()
     logging.info(

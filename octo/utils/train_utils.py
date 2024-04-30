@@ -398,6 +398,21 @@ def merge_params(target_params: Params, pretrained_params: Params) -> Params:
         and flat_target_params[k].shape != flat_pretrained_params[k].shape
     ]
 
+    print(f'keys_to_update:')
+    for key in keys_to_update:
+        print('.'.join(key))
+    print('')
+        
+    print(f'missing keys:')
+    for key in missing_keys:
+        print('.'.join(key))
+    print('')
+    
+    print(f'shape mismatch keys:')
+    for key in shape_mismatch_keys:
+        print('.'.join(key))
+    print('')
+    
     for key in keys_to_update:
         logging.debug(f"Param copied from pre-trained: {'.'.join(key)}")
     if missing_keys or shape_mismatch_keys:
