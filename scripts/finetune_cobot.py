@@ -2,6 +2,7 @@ import datetime
 from functools import partial
 import imp
 import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '0, 5, 8, 9'
 import json
 from absl import app, flags, logging
 import flax
@@ -42,6 +43,8 @@ try:
     initialise_tracking()
 except ImportError:
     pass
+
+from configs.finetune_config_cobot import load_rename_map
 
 FLAGS = flags.FLAGS
 
@@ -242,7 +245,7 @@ def main(_):
         verbose = True,
         dataset_statistics=dataset.dataset_statistics,
     )
-    merged_params = merge_params(model.params, pretrained_model.params)
+    merged_params = merge_params(model.params, pretrained_model.params, load_rename_map(FLAGS.config.rename_map_path))
     model = model.replace(params=merged_params)
     del pretrained_model
 

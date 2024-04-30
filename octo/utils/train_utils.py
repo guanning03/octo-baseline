@@ -432,6 +432,63 @@ def merge_params(target_params: Params, pretrained_params: Params) -> Params:
     target_params = flax.traverse_util.unflatten_dict(flat_target_params)
     return target_params
 
+def merge_params(target_params: Params, pretrained_params: Params, rename_map: dict) -> Params:
+    """Copies pre-trained params into target_params for every param that has corresponding key + shape."""
+    flat_target_params = flax.traverse_util.flatten_dict(target_params)
+    flat_pretrained_params = flax.traverse_util.flatten_dict(pretrained_params)
+    keys_to_update = [
+        k
+        for k in flat_target_params
+        if k in flat_pretrained_params
+        and flat_target_params[k].shape == flat_pretrained_params[k].shape
+    ]
+    missing_keys = [k for k in flat_target_params if k not in flat_pretrained_params]
+    shape_mismatch_keys = [
+        k
+        for k in flat_target_params
+        if k in flat_pretrained_params
+        and flat_target_params[k].shape != flat_pretrained_params[k].shape
+    ]
+    
+    effective_keys = {k: flat_pretrained_params[k] for k in keys_to_update}
+    
+    for key in keys_to_update:
+        logging.debug(f"Param copied from pre-trained: {'.'.join(key)}")
+    if missing_keys or shape_mismatch_keys:
+        logging.info("########## Parameters skipped during model loading: ##########")
+        for key in missing_keys:
+            logging.info(
+                f"Param missing in pre-trained model, skipping: {'.'.join(key)}"
+            )
+        for key in shape_mismatch_keys:
+            logging.info(
+                f"Param with differing shape in pre-trained model, skipping: {'.'.join(key)}"
+            )
+            
+    if rename_map:
+        logging.info("########## Parameters renamed during model loading: ##########")
+        for key in rename_map:
+            target_key_exists = key in flat_target_params
+            pretrained_key_exists = rename_map[key] in flat_pretrained_params
+            shapes_match = target_key_exists and pretrained_key_exists and \
+                        flat_target_params[key].shape == flat_pretrained_params[rename_map[key]].shape
+
+            if target_key_exists and pretrained_key_exists and shapes_match:
+                effective_keys[key] = flat_pretrained_params[rename_map[key]]
+                logging.debug(f"Param copied from pre-trained: {'.'.join(key)} -> {'.'.join(rename_map[key])}")
+            else:
+                if not pretrained_key_exists:
+                    logging.info(f"Skipping {'.'.join(key)} -> {'.'.join(rename_map[key])} because the key is not present in the pre-trained model.")
+                if not target_key_exists:
+                    logging.info(f"Skipping {'.'.join(key)} -> {'.'.join(rename_map[key])} because the key is not present in the target model.")
+                if pretrained_key_exists and target_key_exists and not shapes_match:
+                    logging.info(f"Skipping {'.'.join(key)} -> {'.'.join(rename_map[key])} because the shapes do not match.")
+    
+    flat_target_params = flax.core.copy(
+        flat_target_params, effective_keys
+    )
+    target_params = flax.traverse_util.unflatten_dict(flat_target_params)
+    return target_params
 
 def process_text(batch: Data, text_processor: Optional[TextProcessor]) -> Data:
     """Encodes the language instruction inside the tasks for a batch.

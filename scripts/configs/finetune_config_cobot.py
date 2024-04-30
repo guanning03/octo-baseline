@@ -1,10 +1,10 @@
 import os
 os.environ['CURL_CA_BUNDLE'] = ''
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 from ml_collections import ConfigDict
 from ml_collections.config_dict import FieldReference, placeholder
 import os
 from datetime import datetime
+import json
 
 CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
@@ -13,8 +13,8 @@ DATA_NAME = 'cobot_magic_data_full'
 DATASET_STATISTICS = None
 PRETRAINED_PATH = '/data1/zhuxiaopei/octo-base'
 SAVE_DIR = '/home/zhuxiaopei/ckpt'
-BATCH_SIZE = 4
-MAX_STEPS = 30000
+BATCH_SIZE = 16
+MAX_STEPS = 50000
 WINDOW_SIZE = 2
 FUTURE_SIZE = 4
 MODE='full'
@@ -122,8 +122,9 @@ def get_config(config_string=f"{MODE},language_conditioned"):
         #     trajs_for_viz=8,
         #     samples_per_state=8,
         # ),
+        rename_map_path='./scripts/configs/rename_map.json',
     )
-
+    
     if task == "image_conditioned":
         goal_relabeling_strategy = "uniform"
         keep_image_prob = 1.0
@@ -175,9 +176,9 @@ def get_config(config_string=f"{MODE},language_conditioned"):
     )
     frame_transform_kwargs = dict(
         resize_size={
-            "primary": (240, 320),  # workspace (3rd person) camera is at 256x256
-            "wrist_left": (120, 160),  # wrist camera is at 128x128
-            "wrist_right": (120, 160)
+            "primary": (256, 256),  # workspace (3rd person) camera is at 256x256
+            "wrist_left": (128, 128),  # wrist camera is at 128x128
+            "wrist_right": (128, 128)
         },
         image_augment_kwargs=[
             workspace_augment_kwargs,
@@ -192,3 +193,16 @@ def get_config(config_string=f"{MODE},language_conditioned"):
     config["traj_transform_kwargs"] = traj_transform_kwargs
     config["frame_transform_kwargs"] = frame_transform_kwargs
     return ConfigDict(config)
+
+def load_rename_map(path):
+    with open(path, 'r') as f:
+        rename_map_raw = json.load(f)
+    rename_map = {}
+    for key, value in rename_map_raw.items():
+        tuple_key = tuple(key.strip('()').split(', '))
+        tuple_value = tuple(value.strip('()').split(', '))
+        rename_map[tuple_key] = tuple_value
+    return rename_map
+
+if __name__ == "__main__":
+    print(load_rename_map('./rename_map.json'))
