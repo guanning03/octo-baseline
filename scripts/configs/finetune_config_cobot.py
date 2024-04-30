@@ -5,6 +5,7 @@ from ml_collections import ConfigDict
 from ml_collections.config_dict import FieldReference, placeholder
 import os
 from datetime import datetime
+import json
 
 CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
@@ -13,8 +14,8 @@ DATA_NAME = 'cobot_magic_data_full'
 DATASET_STATISTICS = None
 PRETRAINED_PATH = '/data1/zhuxiaopei/octo-base'
 SAVE_DIR = '/home/zhuxiaopei/ckpt'
-BATCH_SIZE = 4
-MAX_STEPS = 30000
+BATCH_SIZE = 16
+MAX_STEPS = 50000
 WINDOW_SIZE = 2
 FUTURE_SIZE = 4
 MODE='full'
@@ -122,8 +123,9 @@ def get_config(config_string=f"{MODE},language_conditioned"):
         #     trajs_for_viz=8,
         #     samples_per_state=8,
         # ),
+        rename_map=load_rename_map('./config/rename_map.json')
     )
-
+    
     if task == "image_conditioned":
         goal_relabeling_strategy = "uniform"
         keep_image_prob = 1.0
@@ -192,3 +194,16 @@ def get_config(config_string=f"{MODE},language_conditioned"):
     config["traj_transform_kwargs"] = traj_transform_kwargs
     config["frame_transform_kwargs"] = frame_transform_kwargs
     return ConfigDict(config)
+
+def load_rename_map(path):
+    with open(path, 'r') as f:
+        rename_map_raw = json.load(f)
+    rename_map = {}
+    for key, value in rename_map_raw.items():
+        tuple_key = tuple(key.strip('()').split(', '))
+        tuple_value = tuple(value.strip('()').split(', '))
+        rename_map[tuple_key] = tuple_value
+    return rename_map
+
+if __name__ == "__main__":
+    print(load_rename_map('./rename_map.json'))

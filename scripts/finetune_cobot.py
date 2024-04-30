@@ -242,7 +242,7 @@ def main(_):
         verbose = True,
         dataset_statistics=dataset.dataset_statistics,
     )
-    merged_params = merge_params(model.params, pretrained_model.params)
+    merged_params = merge_params(model.params, pretrained_model.params, FLAGS.config.rename_map)
     model = model.replace(params=merged_params)
     del pretrained_model
 
