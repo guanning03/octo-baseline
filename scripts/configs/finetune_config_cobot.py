@@ -1,6 +1,5 @@
 import os
 os.environ['CURL_CA_BUNDLE'] = ''
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 from ml_collections import ConfigDict
 from ml_collections.config_dict import FieldReference, placeholder
 import os
@@ -123,7 +122,7 @@ def get_config(config_string=f"{MODE},language_conditioned"):
         #     trajs_for_viz=8,
         #     samples_per_state=8,
         # ),
-        rename_map=load_rename_map('./config/rename_map.json')
+        rename_map_path='./scripts/configs/rename_map.json',
     )
     
     if task == "image_conditioned":
