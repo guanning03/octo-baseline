@@ -198,19 +198,21 @@ class LanguageTokenizer(nn.Module):
         observations,
         tasks=None,
         train: bool = True,
-    ):
+    ):        
         if "language_instruction" not in tasks:
             logging.warning("No language inputs found. Skipping tokenizer entirely.")
             assert self.proper_pad_mask, "Cannot skip unless using proper pad mask."
             return None
 
         if not isinstance(tasks["language_instruction"], jax.Array):
+            # print('language instruction is jax array')
             assert (
                 self.encoder is not None
             ), "Received language tokens but no encoder specified."
             tokens = self.hf_model(**tasks["language_instruction"]).last_hidden_state
         else:
             # add a # tokens dimension to language
+            # print('language instruction is not jax array')
             if tasks["language_instruction"].ndim == 2:
                 tokens = tasks["language_instruction"][:, None, :]
             else:

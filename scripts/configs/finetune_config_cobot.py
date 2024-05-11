@@ -9,15 +9,16 @@ import json
 CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
 DATA_DIR = '/data1/zhuxiaopei/'
-DATA_NAME = 'cobot_magic_data_full'
+DATA_NAME = 'put_orange_paperbox'
 DATASET_STATISTICS = None
 PRETRAINED_PATH = '/data1/zhuxiaopei/octo-base'
-SAVE_DIR = '/home/zhuxiaopei/ckpt'
+SAVE_DIR = '/data/zhuxiaopei/ckpt/'
 BATCH_SIZE = 16
-MAX_STEPS = 50000
+MAX_STEPS = 80000
 WINDOW_SIZE = 2
 FUTURE_SIZE = 4
 MODE='full'
+CHANGE_MODEL_CONFIG = True
 
 def get_config(config_string=f"{MODE},language_conditioned"):
     mode, task = config_string.split(",")
@@ -36,7 +37,8 @@ def get_config(config_string=f"{MODE},language_conditioned"):
 
     ### 这个就是传给 make_single_dataset 的第一个参数
     FINETUNING_KWARGS = {
-        "name": DATA_NAME,
+        "name_train": f'{DATA_NAME}_train',
+        'name_val': f'{DATA_NAME}_val',
         "data_dir": DATA_DIR,
         "train_ratio": 0.85,
         "image_obs_keys": {"primary": "cam_high", 
@@ -87,13 +89,13 @@ def get_config(config_string=f"{MODE},language_conditioned"):
         shuffle_buffer_size=20000,
         num_steps=max_steps,
         log_interval=100,
-        eval_interval=5000,
-        save_interval=5000,
+        eval_interval=1000,
+        save_interval=1000,
         save_dir=SAVE_DIR,
-        seed=42,
+        seed=114514,
         wandb=dict(
             project="octo_cobot", group=placeholder(str), entity=placeholder(str)
-        ),
+        ), 
         dataset_kwargs=FINETUNING_KWARGS,
         modality=task,
         finetuning_mode=mode,
@@ -101,20 +103,21 @@ def get_config(config_string=f"{MODE},language_conditioned"):
         optimizer=dict(
             learning_rate=dict(
                 name="cosine",
-                init_value=0.0,
-                peak_value=3e-4,
+                init_value=1e-5,
+                peak_value=2e-3,
                 warmup_steps=2000,
                 decay_steps=max_steps,
-                end_value=0.0,
+                end_value=0,
             ),
+            # learning_rate = 5e-5,
             weight_decay=0.01,
-            clip_gradient=1.0,
+            # clip_gradient=1.0,
             frozen_keys=frozen_keys,
-            grad_accumulation_steps=None,  # if you are using grad accumulation, you need to adjust max_steps accordingly
+            grad_accumulation_steps=4,  # if you are using grad accumulation, you need to adjust max_steps accordingly
         ),
         val_kwargs=dict(
-            val_shuffle_buffer_size=20000,
-            num_val_batches=256,
+            val_shuffle_buffer_size=10000,
+            num_val_batches=64,
         ),
         # viz_kwargs=dict(
         #     eval_batch_size=128,
@@ -123,6 +126,7 @@ def get_config(config_string=f"{MODE},language_conditioned"):
         #     samples_per_state=8,
         # ),
         rename_map_path='./scripts/configs/rename_map.json',
+        change_model_config = CHANGE_MODEL_CONFIG
     )
     
     if task == "image_conditioned":

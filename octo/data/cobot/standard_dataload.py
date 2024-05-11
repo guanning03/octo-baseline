@@ -25,7 +25,7 @@ def load_dataset_from_hdf5(hdf5_path):
             cam_high = np.array([x.tobytes() for x in f['observations']['images']['cam_high'][:]])
             cam_left_wrist = np.array([x.tobytes() for x in f['observations']['images']['cam_left_wrist'][:]])
             cam_right_wrist = np.array([x.tobytes() for x in f['observations']['images']['cam_right_wrist'][:]])
-            instruction = np.array(f['instruction'][()])
+            instruction = np.array(f['instruction'][()].decode('utf-8'))
             num_episodes = action.shape[0]
 
             # Generate terminate_episode flags

@@ -2,7 +2,7 @@ import datetime
 from functools import partial
 import imp
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '0, 5, 8, 9'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import json
 from absl import app, flags, logging
 import flax
@@ -15,7 +15,7 @@ import tensorflow as tf
 import tqdm
 import wandb
 from octo.data.utils.format import standardize_pytree
-
+import pdb
 from octo.model.components.tokenizers import LowdimObsTokenizer
 from octo.data.dataset import make_single_dataset
 from octo.model.octo_model import OctoModel
@@ -36,7 +36,7 @@ from octo.utils.train_utils import (
     Timer,
     TrainState,
 )
-from octo.model.components.action_heads import DiffusionActionHead
+from octo.model.components.action_heads import *
 try:
     from jax_smi import initialise_tracking  # type: ignore
 
@@ -73,7 +73,7 @@ def main(_):
         Octo Finetuning Script
         ======================
         Pretrained model: {FLAGS.config.pretrained_path}
-        Finetuning Dataset: {FLAGS.config.dataset_kwargs.name}
+        Finetuning Dataset: {FLAGS.config.dataset_kwargs.name_train}
         Data dir: {FLAGS.config.dataset_kwargs.data_dir}
         Task Modality: {FLAGS.config.modality}
         Finetuning Mode: {FLAGS.config.finetuning_mode}
@@ -211,25 +211,35 @@ def main(_):
     #########
     
     #TODO: 需要在这里把模型结构按照所提供的数据形式进行修改
-    config["model"]["observation_tokenizers"]["proprio"] = ModuleSpec.create(
-        LowdimObsTokenizer,
-        n_bins=256,
-        bin_type="normal",
-        low=-2.0,
-        high=2.0,
-        obs_keys=["proprio"],
-    )
-    config["model"]["observation_tokenizers"]["wrist_left"] = config["model"]["observation_tokenizers"]["wrist"]
-    config["model"]["observation_tokenizers"]["wrist_right"] = config["model"]["observation_tokenizers"]["wrist"]
-    del config["model"]["observation_tokenizers"]["wrist"]
     
-    config["model"]["heads"]['action'] = ModuleSpec.create(
-        DiffusionActionHead,
-        readout_key="readout_action",
-        use_map = False,
-        pred_horizon = FLAGS.config.traj_transform_kwargs["future_action_window_size"],
-        action_dim = 14
-    )
+    if FLAGS.config.change_model_config:
+        config["model"]["observation_tokenizers"]["proprio"] = ModuleSpec.create(
+            LowdimObsTokenizer,
+            n_bins=256,
+            bin_type="normal",
+            low=-2.0,
+            high=2.0,
+            obs_keys=["proprio"],
+        )
+
+        config["model"]["observation_tokenizers"]["wrist_left"] = config["model"]["observation_tokenizers"]["wrist"]
+        config["model"]["observation_tokenizers"]["wrist_right"] = config["model"]["observation_tokenizers"]["wrist"]
+        del config["model"]["observation_tokenizers"]["wrist"]
+        
+        # config["model"]["heads"]['action'] = ModuleSpec.create(
+        #     DiffusionActionHead,
+        #     readout_key="readout_action",
+        #     use_map = False,
+        #     pred_horizon = FLAGS.config.traj_transform_kwargs["future_action_window_size"],
+        #     action_dim = 14
+        # )
+        
+        config['model']['heads']['action'] = ModuleSpec.create(
+            L1ActionHead,
+            pred_horizon=FLAGS.config.traj_transform_kwargs["future_action_window_size"],
+            action_dim=14,
+            readout_key="readout_action",
+        )
     
     print(f'model config: {json.dumps(config["model"], indent = 4)}')
     
@@ -245,7 +255,11 @@ def main(_):
         verbose = True,
         dataset_statistics=dataset.dataset_statistics,
     )
-    merged_params = merge_params(model.params, pretrained_model.params, load_rename_map(FLAGS.config.rename_map_path))
+    
+    if FLAGS.config.change_model_config:
+        merged_params = merge_params(model.params, pretrained_model.params, load_rename_map(FLAGS.config.rename_map_path))
+    else:
+        merged_params = merge_params(model.params, pretrained_model.params)
     model = model.replace(params=merged_params)
     del pretrained_model
 
@@ -320,6 +334,8 @@ def main(_):
 
     def loss_fn(params, batch, rng, train=True):
         bound_module = model.module.bind({"params": params}, rngs={"dropout": rng})
+        
+        ### TODO: 有时间从这里逆向回去看模型输入输出是否与预期相符
         transformer_embeddings = bound_module.octo_transformer(
             batch["observation"],
             batch["task"],
@@ -451,7 +467,7 @@ def main(_):
                 {"training": update_info, "timer": timer.get_average_times()}, step=i
             )
 
-        if (i + 1) % FLAGS.config.eval_interval == 0:
+        if (i + 1) % FLAGS.config.eval_interval == 0 or i == 0:
             logging.info("Evaluating...")
 
             with timer("val"):
@@ -467,7 +483,7 @@ def main(_):
             #         rollout_metrics = rollout_callback(train_state, i + 1)
             #         wandb_log(rollout_metrics, step=i)
 
-        if (i + 1) % FLAGS.config.save_interval == 0 and save_dir is not None:
+        if ((i + 1) % FLAGS.config.save_interval == 0 or i == 0) and save_dir is not None :
             logging.info("Saving checkpoint...")
             save_callback(train_state, i + 1)
 

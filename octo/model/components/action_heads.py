@@ -437,8 +437,8 @@ class DiffusionActionHead(nn.Module):
 
     readout_key: str
     use_map: bool = False
-    pred_horizon: int = 1
-    action_dim: int = 7
+    pred_horizon: int = 4
+    action_dim: int = 14
     max_action: float = 5.0
     loss_type: str = "mse"
 

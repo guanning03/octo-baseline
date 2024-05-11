@@ -479,7 +479,8 @@ def make_dataset_from_rlds(
 
 
 def make_dataset_from_rlds(
-    name: str,
+    name_train: str,
+    name_val: str,
     data_dir: str,
     *,
     train: bool,
@@ -646,7 +647,7 @@ def make_dataset_from_rlds(
             "observation": new_obs,
             "task": task,
             "action": tf.cast(traj["action"], tf.float32),
-            "dataset_name": tf.repeat(name, traj_len),
+            "dataset_name": tf.repeat(name_train, traj_len),
         }
 
         if absolute_action_mask is not None:
@@ -665,20 +666,23 @@ def make_dataset_from_rlds(
             
         return traj
     
-    full_dataset = _wrap(load_dataset_from_hdf5, False)(os.path.expanduser(os.path.join(data_dir, name)))
-    # full_dataset = full_dataset.shuffle(buffer_size=100000, seed=1953)
-    full_dataset = full_dataset.traj_map(restructure, num_parallel_calls)
+    if train:    
+        dataset = _wrap(load_dataset_from_hdf5, False)(os.path.expanduser(os.path.join(data_dir, name_train)))
+        # full_dataset = full_dataset.shuffle(buffer_size=100000, seed=1953)
+        dataset = dataset.traj_map(restructure, num_parallel_calls)
 
-    if isinstance(dataset_statistics, str):
-        with tf.io.gfile.GFile(dataset_statistics, "r") as f:
-            dataset_statistics = json.load(f)
-    else:
         dataset_statistics = get_dataset_statistics(
-            full_dataset,
+            dataset,
             hash_dependencies = f"{str(state_obs_keys)} {datetime.now().strftime('%Y-%m-%d')}",
-            save_dir=os.path.expanduser(os.path.join(data_dir, name))
+            save_dir=os.path.expanduser(os.path.join(data_dir, name_train))
         )
-    dataset_statistics = tree_map(np.array, dataset_statistics)
+        dataset_statistics = tree_map(np.array, dataset_statistics)
+    else:
+        dataset = _wrap(load_dataset_from_hdf5, False)(os.path.expanduser(os.path.join(data_dir, name_val)))
+        dataset = dataset.traj_map(restructure, num_parallel_calls)
+        with tf.io.gfile.GFile(os.path.expanduser(os.path.join(data_dir, name_train, 'dataset_statistics.json')), "r") as f:
+            dataset_statistics = json.load(f)
+        dataset_statistics = tree_map(np.array, dataset_statistics)
     
     # skip normalization for certain action and proprio dimensions
     if action_normalization_mask is not None:
@@ -701,26 +705,7 @@ def make_dataset_from_rlds(
                 f"does not match proprio dimension ({dataset_statistics['proprio']['mean'].shape[-1]})."
             )
         dataset_statistics["proprio"]["mask"] = np.array(proprio_normalization_mask)
-    
-    train_remainder = int(20 * train_ratio)
 
-    def is_train(index, item):
-        return index % 20 < train_remainder
-
-    def is_val(index, item):
-        return index % 20 >= train_remainder
-
-    def get_item(index, item):
-        return item
-
-    full_dataset = full_dataset.enumerate()
-
-    train_dataset = full_dataset.filter(is_train).map(get_item)
-    val_dataset = full_dataset.filter(is_val).map(get_item)
-    if train:
-        dataset = train_dataset
-    else:
-        dataset = val_dataset
     dataset = dataset.traj_map(
         partial(
             normalize_action_and_proprio,

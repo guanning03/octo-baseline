@@ -101,7 +101,7 @@ def get_dataset_statistics(
     )
 
     if save_dir is not None:
-        path = tf.io.gfile.join(save_dir, f"dataset_statistics_{unique_hash}.json")
+        path = tf.io.gfile.join(save_dir, f"dataset_statistics.json")
     else:
         path = local_path
 

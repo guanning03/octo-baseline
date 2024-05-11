@@ -1,0 +1,151 @@
+model loaded from /home/zhuxiaopei/ckpt/octo_cobot/continue_20240503_102913/ at step 40000
+hdf5: episode_0.hdf5, "Insert the cube into the slot."
+                                                                Attention Mask                                                                
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓
+┃                                  ┃         ┃ t=0     ┃ t=0     ┃ t=0     ┃ t=0    ┃ t=0     ┃ t=1    ┃ t=1     ┃ t=1    ┃ t=1     ┃ t=1    ┃
+┃                                  ┃ task_l… ┃ obs_pr… ┃ obs_pr… ┃ obs_wr… ┃ obs_w… ┃ readou… ┃ obs_p… ┃ obs_pr… ┃ obs_w… ┃ obs_wr… ┃ reado… ┃
+┃                                  ┃ (16     ┃ (256    ┃ (14     ┃ (64     ┃ (64    ┃ (1      ┃ (256   ┃ (14     ┃ (64    ┃ (64     ┃ (1     ┃
+┃                                  ┃ tokens) ┃ tokens) ┃ tokens) ┃ tokens) ┃ token… ┃ tokens) ┃ token… ┃ tokens) ┃ token… ┃ tokens) ┃ token… ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━╇━━━━━━━━┩
+│ task_language (16 tokens)        │ x       │ x       │ x       │ x       │ x      │ x       │ x      │ x       │ x      │ x       │ x      │
+├──────────────────────────────────┼─────────┼─────────┼─────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┤
+│ t=0 obs_primary (256 tokens)     │         │ x       │ x       │ x       │ x      │ x       │ x      │ x       │ x      │ x       │ x      │
+├──────────────────────────────────┼─────────┼─────────┼─────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┤
+│ t=0 obs_proprio (14 tokens)      │         │ x       │ x       │ x       │ x      │ x       │ x      │ x       │ x      │ x       │ x      │
+├──────────────────────────────────┼─────────┼─────────┼─────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┤
+│ t=0 obs_wrist_left (64 tokens)   │         │ x       │ x       │ x       │ x      │ x       │ x      │ x       │ x      │ x       │ x      │
+├──────────────────────────────────┼─────────┼─────────┼─────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┤
+│ t=0 obs_wrist_right (64 tokens)  │         │ x       │ x       │ x       │ x      │ x       │ x      │ x       │ x      │ x       │ x      │
+├──────────────────────────────────┼─────────┼─────────┼─────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┤
+│ t=0 readout_action (1 tokens)    │         │         │         │         │        │ x       │        │         │        │         │ x      │
+├──────────────────────────────────┼─────────┼─────────┼─────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┤
+│ t=1 obs_primary (256 tokens)     │         │         │         │         │        │         │ x      │ x       │ x      │ x       │ x      │
+├──────────────────────────────────┼─────────┼─────────┼─────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┤
+│ t=1 obs_proprio (14 tokens)      │         │         │         │         │        │         │ x      │ x       │ x      │ x       │ x      │
+├──────────────────────────────────┼─────────┼─────────┼─────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┤
+│ t=1 obs_wrist_left (64 tokens)   │         │         │         │         │        │         │ x      │ x       │ x      │ x       │ x      │
+├──────────────────────────────────┼─────────┼─────────┼─────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┤
+│ t=1 obs_wrist_right (64 tokens)  │         │         │         │         │        │         │ x      │ x       │ x      │ x       │ x      │
+├──────────────────────────────────┼─────────┼─────────┼─────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┼─────────┼────────┤
+│ t=1 readout_action (1 tokens)    │         │         │         │         │        │         │        │         │        │         │ x      │
+└──────────────────────────────────┴─────────┴─────────┴─────────┴─────────┴────────┴─────────┴────────┴─────────┴────────┴─────────┴────────┘
+MSE: 0.02050369
+hdf5: episode_1.hdf5, "Insert the cube into the slot."
+MSE: 0.019588355
+hdf5: episode_2.hdf5, "Insert the cube into the slot."
+MSE: 0.014399226
+hdf5: episode_3.hdf5, "Insert the cube into the slot."
+MSE: 0.02226803
+hdf5: episode_4.hdf5, "Insert the cube into the slot."
+MSE: 0.011415048
+hdf5: episode_5.hdf5, "Insert the cube into the slot."
+MSE: 0.011247204
+hdf5: episode_6.hdf5, "Insert the cube into the slot."
+MSE: 0.014813045
+hdf5: episode_7.hdf5, "Insert the cube into the slot."
+MSE: 0.012586777
+hdf5: episode_8.hdf5, "Insert the cube into the slot."
+MSE: 0.01470351
+hdf5: episode_9.hdf5, "Insert the cube into the slot."
+MSE: 0.019952942
+hdf5: episode_10.hdf5, "Insert the cube into the slot."
+MSE: 0.014054415
+hdf5: episode_11.hdf5, "Insert the cube into the slot."
+MSE: 0.016761132
+hdf5: episode_12.hdf5, "Insert the cube into the slot."
+MSE: 0.01838547
+hdf5: episode_13.hdf5, "Insert the cube into the slot."
+MSE: 0.015953247
+hdf5: episode_14.hdf5, "Insert the cube into the slot."
+MSE: 0.012436007
+hdf5: episode_15.hdf5, "Insert the cube into the slot."
+MSE: 0.00709122
+hdf5: episode_16.hdf5, "Insert the cube into the slot."
+MSE: 0.00431507
+hdf5: episode_17.hdf5, "Insert the cube into the slot."
+MSE: 0.0069896923
+hdf5: episode_18.hdf5, "Insert the cube into the slot."
+MSE: 0.008831541
+hdf5: episode_19.hdf5, "Insert the cube into the slot."
+MSE: 0.025461517
+hdf5: episode_20.hdf5, "Insert the cube into the slot."
+MSE: 0.01333845
+hdf5: episode_21.hdf5, "Insert the cube into the slot."
+MSE: 0.027402636
+hdf5: episode_22.hdf5, "Insert the cube into the slot."
+MSE: 0.018045876
+hdf5: episode_23.hdf5, "Insert the cube into the slot."
+MSE: 0.007885587
+hdf5: episode_24.hdf5, "Insert the cube into the slot."
+MSE: 0.031443745
+hdf5: episode_25.hdf5, "Insert the cube into the slot."
+MSE: 0.017943835
+hdf5: episode_26.hdf5, "Insert the cube into the slot."
+MSE: 0.0101323845
+hdf5: episode_27.hdf5, "Insert the cube into the slot."
+MSE: 0.023389405
+hdf5: episode_28.hdf5, "Insert the cube into the slot."
+MSE: 0.0071294783
+hdf5: episode_29.hdf5, "Insert the cube into the slot."
+MSE: 0.011408443
+hdf5: episode_30.hdf5, "Insert the cube into the slot."
+MSE: 0.007567352
+hdf5: episode_31.hdf5, "Insert the cube into the slot."
+MSE: 0.009114105
+hdf5: episode_32.hdf5, "Insert the cube into the slot."
+MSE: 0.0092896335
+hdf5: episode_33.hdf5, "Insert the cube into the slot."
+MSE: 0.008384921
+hdf5: episode_34.hdf5, "Insert the cube into the slot."
+MSE: 0.027909106
+hdf5: episode_35.hdf5, "Insert the cube into the slot."
+MSE: 0.014577034
+hdf5: episode_36.hdf5, "Insert the cube into the slot."
+MSE: 0.0162945
+hdf5: episode_37.hdf5, "Insert the cube into the slot."
+MSE: 0.007875693
+hdf5: episode_38.hdf5, "Insert the cube into the slot."
+MSE: 0.0076352344
+hdf5: episode_39.hdf5, "Insert the cube into the slot."
+MSE: 0.0071180947
+hdf5: episode_40.hdf5, "Insert the cube into the slot."
+MSE: 0.015375315
+hdf5: episode_41.hdf5, "Insert the cube into the slot."
+MSE: 0.008485905
+hdf5: episode_42.hdf5, "Insert the cube into the slot."
+MSE: 0.009258176
+hdf5: episode_43.hdf5, "Insert the cube into the slot."
+MSE: 0.010359811
+hdf5: episode_44.hdf5, "Insert the cube into the slot."
+MSE: 0.0075601316
+hdf5: episode_45.hdf5, "Insert the cube into the slot."
+MSE: 0.0077008316
+hdf5: episode_46.hdf5, "Insert the cube into the slot."
+MSE: 0.0073514846
+hdf5: episode_47.hdf5, "Insert the cube into the slot."
+MSE: 0.010336109
+hdf5: episode_48.hdf5, "Insert the cube into the slot."
+MSE: 0.016078575
+hdf5: episode_49.hdf5, "Insert the cube into the slot."
+MSE: 0.017363997
+hdf5: episode_50.hdf5, "Insert the cube into the slot."
+MSE: 0.007957831
+hdf5: episode_51.hdf5, "Insert the cube into the slot."
+MSE: 0.022733664
+hdf5: episode_52.hdf5, "Insert the cube into the slot."
+MSE: 0.009520982
+hdf5: episode_53.hdf5, "Insert the cube into the slot."
+MSE: 0.0080115395
+hdf5: episode_54.hdf5, "Insert the cube into the slot."
+MSE: 0.009080968
+hdf5: episode_55.hdf5, "Insert the cube into the slot."
+MSE: 0.013207926
+hdf5: episode_56.hdf5, "Insert the cube into the slot."
+MSE: 0.00825217
+hdf5: episode_57.hdf5, "Insert the cube into the slot."
+MSE: 0.010086976
+hdf5: episode_58.hdf5, "Insert the cube into the slot."
+MSE: 0.010500081
+hdf5: episode_59.hdf5, "Insert the cube into the slot."
+MSE: 0.011659421
+AVG MSE: 6.5580525

@@ -432,7 +432,7 @@ def merge_params(target_params: Params, pretrained_params: Params) -> Params:
     target_params = flax.traverse_util.unflatten_dict(flat_target_params)
     return target_params
 
-def merge_params(target_params: Params, pretrained_params: Params, rename_map: dict) -> Params:
+def merge_params(target_params: Params, pretrained_params: Params, rename_map = None) -> Params:
     """Copies pre-trained params into target_params for every param that has corresponding key + shape."""
     flat_target_params = flax.traverse_util.flatten_dict(target_params)
     flat_pretrained_params = flax.traverse_util.flatten_dict(pretrained_params)

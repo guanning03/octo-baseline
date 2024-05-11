@@ -1,0 +1,49 @@
+model loaded from /data/zhuxiaopei/ckpt/octo_cobot/orange_20240505_000711/ at step 5000
+hdf5: episode_42.hdf5, "Pick up the orange and place it into the paper lunchbox."
+                                                       Attention Mask                                                        
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━━┓
+┃                                  ┃       ┃ t=0   ┃ t=0   ┃ t=0   ┃ t=0   ┃ t=0   ┃ t=1   ┃ t=1   ┃ t=1   ┃ t=1   ┃ t=1    ┃
+┃                                  ┃ task… ┃ obs_… ┃ obs_… ┃ obs_… ┃ obs_… ┃ read… ┃ obs_… ┃ obs_… ┃ obs_… ┃ obs_… ┃ reado… ┃
+┃                                  ┃ (16   ┃ (256  ┃ (14   ┃ (64   ┃ (64   ┃ (1    ┃ (256  ┃ (14   ┃ (64   ┃ (64   ┃ (1     ┃
+┃                                  ┃ toke… ┃ toke… ┃ toke… ┃ toke… ┃ toke… ┃ toke… ┃ toke… ┃ toke… ┃ toke… ┃ toke… ┃ token… ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━━┩
+│ task_language (16 tokens)        │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x      │
+├──────────────────────────────────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼────────┤
+│ t=0 obs_primary (256 tokens)     │       │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x      │
+├──────────────────────────────────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼────────┤
+│ t=0 obs_proprio (14 tokens)      │       │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x      │
+├──────────────────────────────────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼────────┤
+│ t=0 obs_wrist_left (64 tokens)   │       │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x      │
+├──────────────────────────────────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼────────┤
+│ t=0 obs_wrist_right (64 tokens)  │       │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x     │ x      │
+├──────────────────────────────────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼────────┤
+│ t=0 readout_action (1 tokens)    │       │       │       │       │       │ x     │       │       │       │       │ x      │
+├──────────────────────────────────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼────────┤
+│ t=1 obs_primary (256 tokens)     │       │       │       │       │       │       │ x     │ x     │ x     │ x     │ x      │
+├──────────────────────────────────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼────────┤
+│ t=1 obs_proprio (14 tokens)      │       │       │       │       │       │       │ x     │ x     │ x     │ x     │ x      │
+├──────────────────────────────────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼────────┤
+│ t=1 obs_wrist_left (64 tokens)   │       │       │       │       │       │       │ x     │ x     │ x     │ x     │ x      │
+├──────────────────────────────────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼────────┤
+│ t=1 obs_wrist_right (64 tokens)  │       │       │       │       │       │       │ x     │ x     │ x     │ x     │ x      │
+├──────────────────────────────────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼────────┤
+│ t=1 readout_action (1 tokens)    │       │       │       │       │       │       │       │       │       │       │ x      │
+└──────────────────────────────────┴───────┴───────┴───────┴───────┴───────┴───────┴───────┴───────┴───────┴───────┴────────┘
+MSE: 0.7140764
+hdf5: episode_43.hdf5, "Pick up the orange and place it into the paper lunchbox."
+MSE: 0.29853177
+hdf5: episode_44.hdf5, "Pick up the orange and place it into the paper lunchbox."
+MSE: 0.2677104
+hdf5: episode_45.hdf5, "Pick up the orange and place it into the paper lunchbox."
+MSE: 0.5784027
+hdf5: episode_46.hdf5, "Pick up the orange and place it into the paper lunchbox."
+MSE: 0.33477268
+hdf5: episode_47.hdf5, "Pick up the orange and place it into the paper lunchbox."
+MSE: 0.50152355
+hdf5: episode_48.hdf5, "Pick up the orange and place it into the paper lunchbox."
+MSE: 0.24351086
+hdf5: episode_49.hdf5, "Pick up the orange and place it into the paper lunchbox."
+MSE: 0.34237656
+hdf5: episode_50.hdf5, "Pick up the orange and place it into the paper lunchbox."
+MSE: 0.41070908
+AVG MSE: 0.40493506

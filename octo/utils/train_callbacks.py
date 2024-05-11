@@ -200,7 +200,7 @@ class ValidationCallback(Callback):
                 .iterator(prefetch=0)
             )
             val_iterator = map(self.process_batch_fn, val_iterator)
-            self.val_iterators[single_dataset_kwargs["name"]] = val_iterator
+            self.val_iterators[single_dataset_kwargs["name_val"]] = val_iterator
 
         @partial(
             jax.jit,
