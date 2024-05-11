@@ -8,14 +8,14 @@ import json
 
 CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
-DATA_DIR = '/data1/zhuxiaopei/'
-DATA_NAME = 'put_orange_paperbox'
-DATASET_STATISTICS = None
-PRETRAINED_PATH = '/data1/zhuxiaopei/octo-base'
-SAVE_DIR = '/data/zhuxiaopei/ckpt/'
-BATCH_SIZE = 16
+DATA_DIR = '/home/zhuxiaopei/data2/robot/'
+DATA_NAME = 'tiny_ds'
+DATASET_STATISTICS = '/home/zhuxiaopei/data2/robot/tiny_ds/dataset_statistics.json'
+PRETRAINED_PATH = '/home/zhuxiaopei/data2/robot/octo-small'
+SAVE_DIR = '/home/zhuxiaopei/data2/robot/ckpt/'
+BATCH_SIZE = 1
 MAX_STEPS = 80000
-WINDOW_SIZE = 32
+WINDOW_SIZE = 2
 FUTURE_SIZE = 32
 MODE='full'
 CHANGE_MODEL_CONFIG = True
@@ -37,8 +37,9 @@ def get_config(config_string=f"{MODE},language_conditioned"):
 
     ### 这个就是传给 make_single_dataset 的第一个参数
     FINETUNING_KWARGS = {
-        "name_train": f'{DATA_NAME}_train',
-        'name_val': f'{DATA_NAME}_val',
+        # FIXME: 暂时把训练集和验证集改成一样的
+        "name_train": f'{DATA_NAME}',
+        'name_val': f'{DATA_NAME}',
         "data_dir": DATA_DIR,
         "train_ratio": 0.85,
         "image_obs_keys": {"primary": "cam_high", 
@@ -61,7 +62,7 @@ def get_config(config_string=f"{MODE},language_conditioned"):
                                      True, True, True, True, True, True, True],
         "proprio_normalization_mask":[True, True, True, True, True, True, True,
                                       True, True, True, True, True, True, True],
-        # "dataset_statistics": DATASET_STATISTICS,
+        "dataset_statistics": DATASET_STATISTICS,
     }
 
     if mode == "full":
@@ -84,7 +85,7 @@ def get_config(config_string=f"{MODE},language_conditioned"):
 
     config = dict(
         pretrained_path=PRETRAINED_PATH,
-        pretrained_step=300000,
+        pretrained_step=270000,
         batch_size=BATCH_SIZE,
         shuffle_buffer_size=20000,
         num_steps=max_steps,
@@ -93,9 +94,9 @@ def get_config(config_string=f"{MODE},language_conditioned"):
         save_interval=1000,
         real_validation_interval = 1000,
         save_dir=SAVE_DIR,
-        seed=114514,
+        seed=2398,
         wandb=dict(
-            project="octo_cobot", group=placeholder(str), entity=placeholder(str)
+            project="octo_debug", group=placeholder(str), entity=placeholder(str)
         ), 
         dataset_kwargs=FINETUNING_KWARGS,
         modality=task,

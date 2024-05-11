@@ -2,7 +2,7 @@ import datetime
 from functools import partial
 import imp
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+os.environ['CUDA_VISIBLE_DEVICES'] = '9'
 import json
 from absl import app, flags, logging
 import flax
@@ -174,7 +174,7 @@ def main(_):
         batch = process_text(batch, text_processor)
         del batch["dataset_name"]
         return batch
-
+    
     # load standardize_fn from `path/to/file.py:fn_name` format
     ### 把standardize_fn函数解码出来，便于之后传参数给make_single_dataset
     if (
@@ -193,6 +193,7 @@ def main(_):
         frame_transform_kwargs=FLAGS.config.frame_transform_kwargs,
         train=True,
     )
+    
     logging.info('Dataset loaded successfully. Start batching, please be patient ...')
     train_data_iter = (
         dataset.repeat()
@@ -350,7 +351,7 @@ def main(_):
         )
         return action_loss, action_metrics
     
-    def real_loss_fn(params, batch, rng, train = False):
+    def real_loss_fn(params, batch, rng, train = False, dataset_statistics = dataset.dataset_statistics):
         bound_module = model.module.bind({"params": params}, rngs={"dropout": rng})
         transformer_embeddings = bound_module.octo_transformer(
             batch["observation"],
@@ -358,16 +359,24 @@ def main(_):
             batch["observation"]["pad_mask"],
             train=train,
         )
-        ### TODO: 改这个地方，变成采样动作，然后和动作算loss
-        
-        norm_actions = bound_module.heads['action'].predict_action(
+                
+        norm_actions = bound_module.heads['action'].predict_action( # [batch, 32, 14]
             transformer_embeddings,
             train = False,
             rng = jax.random.PRNGKey(0)
         )
         
+        #### FIXME: 下面有一些硬编码！！！
+        action_mean = jnp.array(dataset_statistics['action']['mean'])
+        action_std = jnp.array(dataset_statistics['action']['std'])
+        mean_expanded = action_mean.reshape((1, 1, 14))
+        std_expanded = action_std.reshape((1, 1, 14))
+        action_pred = norm_actions * std_expanded + mean_expanded
+        action_gt = batch['action'][:,2:, :]
+        
         ### TODO: 将norm_actions重新变成原来的action, 然后和batch["action"]算loss
-        return None
+        return jnp.mean((action_pred - action_gt) ** 2), \
+          {'real_mse': jnp.mean((action_pred - action_gt) **2)}
 
     # Data parallelism
     # Model is replicated across devices, data is split across devices
@@ -419,7 +428,7 @@ def main(_):
 
     # 直接关闭验证集
     val_callback = ValidationCallback(
-        loss_fn=loss_fn, ### TODO: 这里的loss_fn需要改成real_loss_fn
+        loss_fn=real_loss_fn, ### TODO: 这里的loss_fn需要改成real_loss_fn
         process_batch_fn=process_batch,
         text_processor=text_processor,
         val_dataset_kwargs_list=dataset_kwargs_list,
