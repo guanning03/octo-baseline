@@ -235,7 +235,7 @@ def main(_):
         # )
         
         config['model']['heads']['action'] = ModuleSpec.create(
-            L1ActionHead,
+            MSEActionHead,
             pred_horizon=FLAGS.config.traj_transform_kwargs["future_action_window_size"],
             action_dim=14,
             readout_key="readout_action",
@@ -349,6 +349,25 @@ def main(_):
             train=train,
         )
         return action_loss, action_metrics
+    
+    def real_loss_fn(params, batch, rng, train = False):
+        bound_module = model.module.bind({"params": params}, rngs={"dropout": rng})
+        transformer_embeddings = bound_module.octo_transformer(
+            batch["observation"],
+            batch["task"],
+            batch["observation"]["pad_mask"],
+            train=train,
+        )
+        ### TODO: 改这个地方，变成采样动作，然后和动作算loss
+        
+        norm_actions = bound_module.heads['action'].predict_action(
+            transformer_embeddings,
+            train = False,
+            rng = jax.random.PRNGKey(0)
+        )
+        
+        ### TODO: 将norm_actions重新变成原来的action, 然后和batch["action"]算loss
+        return None
 
     # Data parallelism
     # Model is replicated across devices, data is split across devices
@@ -362,7 +381,7 @@ def main(_):
         (loss, info), grads = jax.value_and_grad(loss_fn, has_aux=True)(
             state.model.params, batch, dropout_rng, train=True
         )
-        # Gradient Metrics (TODO: Does the finetuner need these?) ###
+        # Gradient Metrics  ###
         grad_norm = optax.global_norm(grads)
         updates, _ = state.tx.update(grads, state.opt_state, state.model.params)
         update_norm = optax.global_norm(updates)
@@ -398,8 +417,9 @@ def main(_):
 
     dataset_kwargs_list = [FLAGS.config.dataset_kwargs]
 
+    # 直接关闭验证集
     val_callback = ValidationCallback(
-        loss_fn=loss_fn,
+        loss_fn=loss_fn, ### TODO: 这里的loss_fn需要改成real_loss_fn
         process_batch_fn=process_batch,
         text_processor=text_processor,
         val_dataset_kwargs_list=dataset_kwargs_list,
@@ -467,6 +487,7 @@ def main(_):
                 {"training": update_info, "timer": timer.get_average_times()}, step=i
             )
 
+        ### 直接关闭验证集
         if (i + 1) % FLAGS.config.eval_interval == 0 or i == 0:
             logging.info("Evaluating...")
 

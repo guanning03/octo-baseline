@@ -17,7 +17,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 HDF5_PATH_LIST = \
 [f'/data1/zhuxiaopei/put_orange_paperbox_val/episode_{i}.hdf5' for i in range(42, 51)]
-MODEL_PATH = '/data/zhuxiaopei/ckpt/octo_cobot/orange_lowlr_20240505_110550/'
+MODEL_PATH = '.'
 STEP = 30000
 
 def MSE(y_true, y_pred):
