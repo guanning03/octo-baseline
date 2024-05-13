@@ -8,12 +8,12 @@ import json
 
 CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
-DATA_DIR = '/home/zhuxiaopei/data2/robot/'
-DATA_NAME = 'tiny_ds'
-DATASET_STATISTICS = '/home/zhuxiaopei/data2/robot/tiny_ds/dataset_statistics.json'
-PRETRAINED_PATH = '/home/zhuxiaopei/data2/robot/octo-small'
-SAVE_DIR = '/home/zhuxiaopei/data2/robot/ckpt/'
-BATCH_SIZE = 1
+DATA_DIR = '/mnt/data_x2/wulingxuan/robot/'
+DATA_NAME = 'data'
+DATASET_STATISTICS = None
+PRETRAINED_PATH = '/mnt/data_x2/wulingxuan/robot/octo-small'
+SAVE_DIR = '/mnt/data_x2/wulingxuan/robot/ckpt/'
+BATCH_SIZE = 24
 MAX_STEPS = 80000
 WINDOW_SIZE = 2
 FUTURE_SIZE = 32
@@ -39,7 +39,7 @@ def get_config(config_string=f"{MODE},language_conditioned"):
     FINETUNING_KWARGS = {
         # FIXME: 暂时把训练集和验证集改成一样的
         "name_train": f'{DATA_NAME}',
-        'name_val': f'{DATA_NAME}',
+        'name_val': f'/mnt/data_x2/wulingxuan/robot/tiny_ds',
         "data_dir": DATA_DIR,
         "train_ratio": 0.85,
         "image_obs_keys": {"primary": "cam_high", 
@@ -87,7 +87,7 @@ def get_config(config_string=f"{MODE},language_conditioned"):
         pretrained_path=PRETRAINED_PATH,
         pretrained_step=270000,
         batch_size=BATCH_SIZE,
-        shuffle_buffer_size=20000,
+        shuffle_buffer_size=10000,
         num_steps=max_steps,
         log_interval=100,
         eval_interval=1000,
@@ -106,7 +106,7 @@ def get_config(config_string=f"{MODE},language_conditioned"):
             learning_rate=dict(
                 name="cosine",
                 init_value=1e-5,
-                peak_value=2e-3,
+                peak_value=5e-5,
                 warmup_steps=2000,
                 decay_steps=max_steps,
                 end_value=0,

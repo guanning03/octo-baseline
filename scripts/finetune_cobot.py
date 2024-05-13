@@ -2,7 +2,7 @@ import datetime
 from functools import partial
 import imp
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '9'
+os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5, 6, 7'
 import json
 from absl import app, flags, logging
 import flax
@@ -112,7 +112,7 @@ def main(_):
     # Setup WandB
     #
     #########
-
+    wandb.login(key = '256879fdda25bc1fb8ee4f0310e71615e92f75c9')
     name = format_name_with_config(
         FLAGS.name,
         FLAGS.config.to_dict(),
@@ -193,6 +193,15 @@ def main(_):
         frame_transform_kwargs=FLAGS.config.frame_transform_kwargs,
         train=True,
     )
+    
+    # 假设dataset已经定义并可以访问
+    def count_dataset_samples(dataset):
+        # 这个函数将遍历数据集中的所有样本来计算总数
+        return sum(1 for _ in dataset)
+
+    # 在您的数据迭代器之前计算样本数
+    total_samples = count_dataset_samples(dataset.unbatch())
+    logging.info(f'There are totally {total_samples} samples in the dataset.')
     
     logging.info('Dataset loaded successfully. Start batching, please be patient ...')
     train_data_iter = (

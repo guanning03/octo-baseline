@@ -62,7 +62,13 @@ def load_dataset_from_hdf5(hdf5_path):
             all_datasets.append(dataset)
 
     # Use flat_map to flatten all datasets into one
-    complete_dataset = tf.data.Dataset.from_tensor_slices(all_datasets).flat_map(lambda x: x)
+    complete_dataset = tf.data.Dataset.from_tensor_slices(all_datasets)
+
+    complete_dataset = complete_dataset.interleave(
+        lambda x: x,
+        cycle_length=1, 
+        num_parallel_calls=1  
+    )
 
     return complete_dataset
 

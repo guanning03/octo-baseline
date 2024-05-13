@@ -415,7 +415,7 @@ def allocate_threads(n: Optional[int], weights: np.ndarray):
     but each element is no less than 1. If `n` is None, then every dataset is assigned a value of AUTOTUNE.
     """
     if n is None:
-        return np.array([tf.data.AUTOTUNE] * len(weights))
+        return np.array([2] * len(weights))
 
     assert np.all(weights >= 0), "Weights must be non-negative"
     assert (

@@ -241,10 +241,13 @@ class ContinuousActionHead(nn.Module, ActionHead):
             mean, actions_chunked, pad_mask[:, :, None, None], loss_type=self.loss_type
         )
         # Sum over action dimension instead of averaging
-        loss = loss * self.action_dim
-        metrics["loss"] = metrics["loss"] * self.action_dim
-        metrics["mse"] = metrics["mse"] * self.action_dim
-        return loss, metrics
+        # loss = loss * self.action_dim
+        # metrics["loss"] = metrics["loss"] * self.action_dim
+        # metrics["mse"] = metrics["mse"] * self.action_dim
+        loss = loss 
+        metrics["loss"] = metrics["loss"] 
+        metrics["mse"] = metrics["mse"] 
+        return loss,   
 
     def predict_action(
         self,
@@ -553,9 +556,9 @@ class DiffusionActionHead(nn.Module):
             pred_eps, noise, pad_mask[:, :, None], loss_type=self.loss_type
         )
         # Sum over action dimension instead of averaging
-        loss = loss * self.action_dim
-        metrics["loss"] = metrics["loss"] * self.action_dim
-        metrics["mse"] = metrics["mse"] * self.action_dim
+        loss = loss
+        metrics["loss"] = metrics["loss"]
+        metrics["mse"] = metrics["mse"]
         return loss, metrics
 
     def predict_action(

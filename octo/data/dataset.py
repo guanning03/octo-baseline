@@ -41,7 +41,7 @@ def apply_trajectory_transforms(
     max_proprio: Optional[float] = None,
     task_augment_strategy: Optional[str] = None,
     task_augment_kwargs: dict = {},
-    num_parallel_calls: int = tf.data.AUTOTUNE,
+    num_parallel_calls: int = 2,
 ) -> dl.DLataset:
     """Applies common transforms that happen at a trajectory level. Such transforms are usually some sort of
     "relabeling" (e.g. filtering, chunking, adding goals, dropping keys). Transforms that happen in this
@@ -145,7 +145,7 @@ def apply_frame_transforms(
     image_augment_kwargs: Union[dict, Mapping[str, dict]] = {},
     resize_size: Union[Tuple[int, int], Mapping[str, Tuple[int, int]]] = {},
     depth_resize_size: Union[Tuple[int, int], Mapping[str, Tuple[int, int]]] = {},
-    num_parallel_calls: int = tf.data.AUTOTUNE,
+    num_parallel_calls: int = 2,
 ) -> dl.DLataset:
     """Applies common transforms that happen at a frame level. These transforms are usually more
     CPU-intensive, (e.g. decoding or resizing images).
@@ -223,8 +223,8 @@ def make_dataset_from_rlds(
     proprio_normalization_mask: Optional[Sequence[bool]] = None,
     norm_skip_keys: Optional[Sequence[str]] = None,
     filter_functions: Sequence[ModuleSpec] = (),
-    num_parallel_reads: int = tf.data.AUTOTUNE,
-    num_parallel_calls: int = tf.data.AUTOTUNE,
+    num_parallel_reads: int = 2,
+    num_parallel_calls: int = 2,
 ) -> Tuple[dl.DLataset, dict]:
     """This function is responsible for loading a specific RLDS dataset from storage and getting it into a
     standardized format. Yields a dataset of trajectories. Does not include CPU-intensive operations.
