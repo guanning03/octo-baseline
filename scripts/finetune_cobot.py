@@ -2,8 +2,9 @@ import datetime
 from functools import partial
 import imp
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5, 6, 7'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0, 3'
 import json
+import h5py
 from absl import app, flags, logging
 import flax
 from flax.traverse_util import flatten_dict
@@ -27,6 +28,7 @@ from octo.utils.train_callbacks import (
     ValidationCallback,
     VisualizationCallback,
 )
+import itertools
 from octo.utils.train_utils import (
     check_config_diff,
     create_optimizer,
@@ -43,8 +45,11 @@ try:
     initialise_tracking()
 except ImportError:
     pass
-
+import random
 from configs.finetune_config_cobot import load_rename_map
+import io
+from PIL import Image
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 FLAGS = flags.FLAGS
 
@@ -65,7 +70,7 @@ config_flags.DEFINE_config_file(
 
 
 def main(_):
-    logging.set_verbosity(logging.DEBUG) ### 可以调整日志输出的级别
+    logging.set_verbosity(logging.INFO) ### 可以调整日志输出的级别
     initialize_compilation_cache()
     devices = jax.devices()
     logging.info(
@@ -187,31 +192,184 @@ def main(_):
         FLAGS.config["dataset_kwargs"]["standardize_fn"] = standardize_fn
 
     logging.info("Loading dataset, Please be patient...")
-    dataset = make_single_dataset(
-        FLAGS.config.dataset_kwargs,
-        traj_transform_kwargs=FLAGS.config.traj_transform_kwargs,
-        frame_transform_kwargs=FLAGS.config.frame_transform_kwargs,
-        train=True,
-    )
     
-    # 假设dataset已经定义并可以访问
-    def count_dataset_samples(dataset):
-        # 这个函数将遍历数据集中的所有样本来计算总数
-        return sum(1 for _ in dataset)
+    def get_hdf5_files(directory):
+        # 使用 os.walk 遍历目录和子目录
+        hdf5_files = [
+            os.path.join(root, file)
+            for root, dirs, files in os.walk(directory)
+            for file in files if file.endswith('.hdf5')
+        ]
+        return hdf5_files
+    
+    dataset_list = get_hdf5_files(FLAGS.config.dataset_kwargs.data_dir)
+    
+    logging.info(f'There are totally {len(dataset_list)} files in the dataset.')
+    
+    class RandomFileIterator:
+        def __init__(self, file_list, file_batch_size = 8):
+            self.file_list = file_list
+            self.file_batch_size = file_batch_size
+            
+        def __iter__(self):
+            return self
+        
+        def __next__(self):
+            if len(self.file_list) >= self.file_batch_size:
+                return random.sample(self.file_list, self.file_batch_size)
+            else:
+                raise StopIteration
+    
+    file_iter = RandomFileIterator(dataset_list)
+    
+    def filebatch_to_databatch(file_batch, batch_size, text_tokenizer):  
+        
+        def pad_and_resize(image, target_size):
+            original_size = image.size
+            ratio = float(target_size) / max(original_size)
+            new_size = tuple([int(x * ratio) for x in original_size])
+            
+            resized_image = image.resize(new_size, Image.Resampling.LANCZOS)
+            new_image = Image.new("RGB", (target_size, target_size))
+            new_image.paste(resized_image, ((target_size - new_size[0]) // 2, (target_size - new_size[1]) // 2))
 
-    # 在您的数据迭代器之前计算样本数
-    total_samples = count_dataset_samples(dataset.unbatch())
-    logging.info(f'There are totally {total_samples} samples in the dataset.')
+            return new_image
+
+        def bytes_image_to_jnp(image_bytes, image_size=128):
+            image = Image.open(io.BytesIO(image_bytes))
+            image = pad_and_resize(image, image_size)
+            image_array = jnp.array(image)
+            image_array = image_array[:,:,[2,1,0]]
+            return image_array
     
-    logging.info('Dataset loaded successfully. Start batching, please be patient ...')
-    train_data_iter = (
-        dataset.repeat()
-        .unbatch()
-        .shuffle(FLAGS.config.shuffle_buffer_size)
-        .batch(FLAGS.config.batch_size)
-        .iterator()
-    )
-    train_data_iter = map(process_batch, train_data_iter)
+        input_ids = []
+        attention_mask = []
+        primary = []
+        wrist_left = []
+        wrist_right = []
+        action = []
+        proprio = []
+        timestep = []
+        item_per_file = batch_size / len(file_batch)
+        
+        for filename in file_batch:
+            
+            file = h5py.File(filename, 'r')
+            traj_len = file['action'].shape[0]
+            text_token = text_tokenizer.encode([str(file['instruction'])])
+            input_ids.extend([text_token['input_ids'] for _ in range(int(item_per_file))])
+            attention_mask.extend([text_token['attention_mask'] for _ in range(int(item_per_file))])
+            start_points = [random.randint(0, traj_len - 34) for _ in range(int(item_per_file))]
+            timestep.append(start_points)
+            
+            for start_point in start_points:
+                action.append(file['action'][start_point:start_point+34])
+                proprio.append(file['observations']['qpos'][start_point:start_point+2])
+                primary.append(file['observations']['images']['cam_high'][start_point:start_point+34])
+                wrist_left.append(file['observations']['images']['cam_left_wrist'][start_point:start_point+34])
+                wrist_right.append(file['observations']['images']['cam_right_wrist'][start_point:start_point+34])
+                
+        action = jnp.stack(action, axis=0)
+        proprio = jnp.stack(proprio, axis=0)
+        input_ids = jnp.stack(input_ids, axis=1).squeeze(0)
+        attention_mask = jnp.stack(attention_mask, axis=1).squeeze(0)
+        
+        batch = {}
+        batch['action'] = action
+        batch['task'] = {}
+        batch['task']['language_instruction'] = {}
+        batch['task']['language_instruction']['input_ids'] = input_ids
+        batch['task']['language_instruction']['attention_mask'] = attention_mask
+        batch['observation'] = {}
+        batch['observation']['proprio'] = proprio
+        
+        true_pad_mask = jnp.array([[True for _ in range(2)] for _ in range(batch_size)]).reshape((batch_size, 2))
+        batch['task']['pad_mask_dict'] = {'language_instruction': jnp.array([True for _ in range(batch_size)])}
+        timestep = jnp.array(timestep).reshape((batch_size, 1))
+        increment = jnp.arange(2).reshape((1, 2))
+        timestep = timestep + increment
+        batch['observation']['timestep'] = timestep
+        
+        batch['observation']['pad_mask_dict'] = {
+            'image_primary': true_pad_mask,
+            'image_wrist_left': true_pad_mask,
+            'image_wrist_right': true_pad_mask,
+        }
+        
+        batch['observation']['pad_mask'] = true_pad_mask
+        
+        for i in range(len(primary)):
+            primary[i] = jnp.stack([bytes_image_to_jnp(primary[i][j], image_size=256) for j in range(2)], axis=0)
+            wrist_left[i] = jnp.stack([bytes_image_to_jnp(wrist_left[i][j], image_size=128) for j in range(2)], axis=0)
+            wrist_right[i] = jnp.stack([bytes_image_to_jnp(wrist_right[i][j], image_size=128) for j in range(2)], axis=0)
+            
+        primary = jnp.stack(primary, axis=0)
+        wrist_left = jnp.stack(wrist_left, axis=0)
+        wrist_right = jnp.stack(wrist_right, axis=0)
+        batch['observation']['image_primary'] = primary
+        batch['observation']['image_wrist_left'] = wrist_left
+        batch['observation']['image_wrist_right'] = wrist_right
+        batch['absolute_action_mask'] = jnp.ones((batch_size, 14))
+        
+        return batch
+    
+    class DataLoader:
+        def __init__(self, iterator, batch_size, text_tokenizer, prefetch_count=50):
+            self.iterator = iterator
+            self.batch_size = batch_size
+            self.text_tokenizer = text_tokenizer
+            self.prefetch_count = prefetch_count
+            self.executor = ThreadPoolExecutor(max_workers=prefetch_count)
+            self.futures = []
+            self._preload_batches()
+            
+        def _preload_batches(self):
+            while len(self.futures) < self.prefetch_count:
+                try:
+                    file_batch = next(self.iterator)
+                    future = self.executor.submit(filebatch_to_databatch, file_batch, self.batch_size, self.text_tokenizer)
+                    self.futures.append(future)
+                except StopIteration:
+                    break
+            
+        def __iter__(self):
+            return self
+        
+        def __next__(self):
+            if not self.futures:
+                raise StopIteration
+            
+            future = self.futures.pop(0)
+            self._preload_batches()
+            return future.result()
+    
+    train_data_iter = DataLoader(file_iter, FLAGS.config.batch_size, text_processor)
+                          
+    # dataset = make_single_dataset(
+    #     FLAGS.config.dataset_kwargs,
+    #     traj_transform_kwargs=FLAGS.config.traj_transform_kwargs,
+    #     frame_transform_kwargs=FLAGS.config.frame_transform_kwargs,
+    #     train=True,
+    # )
+    
+    # # 假设dataset已经定义并可以访问
+    # def count_dataset_samples(dataset):
+    #     # 这个函数将遍历数据集中的所有样本来计算总数
+    #     return sum(1 for _ in dataset)
+
+    # # 在您的数据迭代器之前计算样本数
+    # total_samples = count_dataset_samples(dataset.unbatch())
+    # logging.info(f'There are totally {total_samples} samples in the dataset.')
+    
+    # logging.info('Dataset loaded successfully. Start batching, please be patient ...')
+    # train_data_iter = (
+    #     dataset.repeat()
+    #     .unbatch()
+    #     .shuffle(FLAGS.config.shuffle_buffer_size)
+    #     .batch(FLAGS.config.batch_size)
+    #     .iterator()
+    # )
+    # train_data_iter = map(process_batch, train_data_iter)
     example_batch = next(train_data_iter)
     logging.info('Training data iteration loaded successfully')
     #########
@@ -236,20 +394,20 @@ def main(_):
         config["model"]["observation_tokenizers"]["wrist_right"] = config["model"]["observation_tokenizers"]["wrist"]
         del config["model"]["observation_tokenizers"]["wrist"]
         
-        # config["model"]["heads"]['action'] = ModuleSpec.create(
-        #     DiffusionActionHead,
-        #     readout_key="readout_action",
-        #     use_map = False,
-        #     pred_horizon = FLAGS.config.traj_transform_kwargs["future_action_window_size"],
-        #     action_dim = 14
-        # )
-        
-        config['model']['heads']['action'] = ModuleSpec.create(
-            MSEActionHead,
-            pred_horizon=FLAGS.config.traj_transform_kwargs["future_action_window_size"],
-            action_dim=14,
+        config["model"]["heads"]['action'] = ModuleSpec.create(
+            DiffusionActionHead,
             readout_key="readout_action",
+            use_map = False,
+            pred_horizon = FLAGS.config.traj_transform_kwargs["future_action_window_size"],
+            action_dim = 14
         )
+        
+        # config['model']['heads']['action'] = ModuleSpec.create(
+        #     MSEActionHead,
+        #     pred_horizon=FLAGS.config.traj_transform_kwargs["future_action_window_size"],
+        #     action_dim=14,
+        #     readout_key="readout_action",
+        # )
     
     print(f'model config: {json.dumps(config["model"], indent = 4)}')
     
@@ -263,7 +421,7 @@ def main(_):
         text_processor,
         rng=init_rng,
         verbose = True,
-        dataset_statistics=dataset.dataset_statistics,
+        dataset_statistics=None,
     )
     
     if FLAGS.config.change_model_config:
@@ -360,7 +518,7 @@ def main(_):
         )
         return action_loss, action_metrics
     
-    def real_loss_fn(params, batch, rng, train = False, dataset_statistics = dataset.dataset_statistics):
+    def real_loss_fn(params, batch, rng, train = False):
         bound_module = model.module.bind({"params": params}, rngs={"dropout": rng})
         transformer_embeddings = bound_module.octo_transformer(
             batch["observation"],
@@ -375,12 +533,12 @@ def main(_):
             rng = jax.random.PRNGKey(0)
         )
         
-        #### FIXME: 下面有一些硬编码！！！
-        action_mean = jnp.array(dataset_statistics['action']['mean'])
-        action_std = jnp.array(dataset_statistics['action']['std'])
-        mean_expanded = action_mean.reshape((1, 1, 14))
-        std_expanded = action_std.reshape((1, 1, 14))
-        action_pred = norm_actions * std_expanded + mean_expanded
+        #### FIXME: 下面有一些硬编码
+        # action_mean = jnp.array(dataset_statistics['action']['mean'])
+        # action_std = jnp.array(dataset_statistics['action']['std'])
+        # mean_expanded = action_mean.reshape((1, 1, 14))
+        # std_expanded = action_std.reshape((1, 1, 14))
+        action_pred = norm_actions
         action_gt = batch['action'][:,2:, :]
         
         ### TODO: 将norm_actions重新变成原来的action, 然后和batch["action"]算loss

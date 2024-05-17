@@ -247,7 +247,7 @@ class ContinuousActionHead(nn.Module, ActionHead):
         loss = loss 
         metrics["loss"] = metrics["loss"] 
         metrics["mse"] = metrics["mse"] 
-        return loss,   
+        return loss, metrics
 
     def predict_action(
         self,
